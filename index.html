@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Room - 1/1 Secure</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Clean Premium Aesthetic */
+        body { background-color: #020617; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; overflow-x: hidden; user-select: none; }
+        .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        
+        /* Smooth Animations */
+        .pulse-soft { animation: pulseSoft 3s infinite alternate; }
+        @keyframes pulseSoft { 0% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.4); } 100% { box-shadow: 0 0 25px rgba(59, 130, 246, 0.8); } }
+        
+        .pulse-wave { position: absolute; border: 1px solid rgba(59, 130, 246, 0.5); border-radius: 50%; animation: pulsewave 2.5s infinite linear; opacity: 0; }
+        .pulse-wave:nth-child(2) { animation-delay: 1.2s; }
+        @keyframes pulsewave { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
+
+        /* Floating Hearts (Subtle) */
+        .heart-float { position: absolute; bottom: -10px; right: 15px; font-size: 1rem; color: #ec4899; opacity: 0; animation: floatUp 3.5s ease-in-out infinite; z-index: 50; }
+        .heart-float:nth-child(2) { animation-delay: 1.5s; right: 35px; font-size: 0.8rem; color: #ef4444; }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 0; } 30% { opacity: 0.7; } 100% { transform: translateY(-120px) scale(1.2); opacity: 0; } }
+
+        /* Clean Audio Equalizer */
+        .bar { width: 3px; background: #22c55e; border-radius: 3px; animation: eq 1.2s ease-in-out infinite alternate; display: inline-block; margin: 0 1px; }
+        .bar:nth-child(1) { animation-delay: 0.1s; height: 8px; }
+        .bar:nth-child(2) { animation-delay: 0.3s; height: 14px; }
+        .bar:nth-child(3) { animation-delay: 0.5s; height: 10px; }
+        @keyframes eq { 0% { height: 4px; } 100% { height: 16px; } }
+
+        /* Smooth Typing Indicator */
+        .dot-flashing { position: relative; width: 4px; height: 4px; border-radius: 50%; background-color: #60a5fa; animation: dot-flashing 1s infinite linear alternate; animation-delay: 0.5s; }
+        .dot-flashing::before, .dot-flashing::after { content: ''; position: absolute; top: 0; width: 4px; height: 4px; border-radius: 50%; background-color: #60a5fa; animation: dot-flashing 1s infinite alternate; }
+        .dot-flashing::before { left: -8px; animation-delay: 0s; }
+        .dot-flashing::after { left: 8px; animation-delay: 1s; }
+        @keyframes dot-flashing { 0% { opacity: 1; } 50%, 100% { opacity: 0.2; } }
+
+        .vibrate-btn { animation: vibrate 0.2s linear infinite both; }
+        @keyframes vibrate { 0%, 100% { transform: translate(0); } 25% { transform: translate(-1px, 1px); } 50% { transform: translate(1px, -1px); } 75% { transform: translate(-1px, -1px); } }
+
+        .bg-smooth-blur { filter: blur(10px) brightness(0.4); transition: all 0.6s ease; }
+        
+        /* Hold Button Premium Fill */
+        .hold-btn { position: relative; overflow: hidden; transition: transform 0.1s; }
+        .hold-btn:active { transform: scale(0.97); }
+        .hold-fill { position: absolute; top: 0; left: 0; height: 100%; background: rgba(255,255,255,0.25); width: 0%; transition: width 0.1s linear; pointer-events: none; }
+        
+        .time-bar { width: 100%; height: 2px; background: #ef4444; animation: shrink 40s linear forwards; }
+        @keyframes shrink { from { width: 100%; } to { width: 0%; } }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="antialiased h-screen overflow-hidden" id="mainBody">
+
+    <!-- Toast Notification -->
+    <div id="privacyToast" class="fixed top-20 left-1/2 transform -translate-x-1/2 z-[100] bg-slate-900/90 border border-slate-700 text-white rounded-full px-5 py-2 shadow-2xl flex items-center gap-2 text-[11px] opacity-0 transition-all duration-500 backdrop-blur-md">
+        <i class="fas fa-shield-check text-green-400"></i> Screen Recording Blocked
+    </div>
+
+    <!-- MAIN CLICK TRAP WRAPPER -->
+    <div id="contentWrapper" class="h-full overflow-y-auto pb-32 transition-all duration-700 hide-scrollbar" onclick="triggerTrap(event)">
+        
+        <!-- Progress Bar -->
+        <div class="fixed top-0 left-0 w-full z-[70]"><div class="time-bar"></div></div>
+
+        <!-- Premium Header -->
+        <nav class="sticky top-0 z-[60] glass-panel border-b border-slate-800 shadow-xl">
+            <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="relative">
+                        <img src="https://lh3.googleusercontent.com/d/1rm_yVBE3kEiCDoAfI2bWr6bOm9TDqGGm" class="w-12 h-12 rounded-full border border-blue-500/50 object-cover pulse-soft">
+                        <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-red-500 border-2 border-slate-950 rounded-full animate-pulse flex items-center justify-center"><i class="fas fa-video text-[6px] text-white"></i></span>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-base text-slate-100 flex items-center gap-1">Viola <i class="fas fa-certificate text-blue-400 text-xs"></i></h1>
+                        <p class="text-[10px] text-emerald-400 font-medium tracking-wide flex items-center gap-1">
+                            <i class="fas fa-eye-slash"></i> 1 Guest (Private Mode)
+                        </p>
+                    </div>
+                </div>
+                <!-- Hold to Sync Button -->
+                <button onmousedown="startHold()" onmouseup="endHold()" ontouchstart="startHold()" ontouchend="endHold()" class="hold-btn bg-blue-600 text-white font-bold px-5 py-2.5 rounded-lg text-xs shadow-lg flex items-center gap-2">
+                    <i class="fas fa-fingerprint text-sm opacity-80"></i> SYNC DEVICE
+                    <div id="holdFill" class="hold-fill"></div>
+                </button>
+            </div>
+        </nav>
+
+        <main class="max-w-4xl mx-auto px-4 mt-5 space-y-6">
+            
+            <!-- Connection Stats -->
+            <div class="flex justify-between items-center px-1">
+                <div class="text-[10px] text-slate-400 flex items-center gap-1.5 bg-slate-900/60 px-3 py-1 rounded-full border border-slate-800">
+                    <i class="fas fa-signal text-emerald-500"></i> Ping: <span id="pingCounter">18</span>ms
+                </div>
+                <div class="flex gap-2">
+                    <span class="text-[9px] bg-emerald-900/30 text-emerald-400 border border-emerald-800/50 px-2 py-1 rounded font-semibold tracking-wide">HD ENCRYPTED</span>
+                    <span class="text-[9px] bg-blue-900/30 text-blue-400 border border-blue-800/50 px-2 py-1 rounded font-semibold tracking-wide">0% FEES</span>
+                </div>
+            </div>
+
+            <!-- Video Stream Player -->
+            <div class="relative glass-panel rounded-2xl overflow-hidden shadow-2xl border border-slate-800 bg-black aspect-video sm:aspect-video">
+                <iframe src="https://drive.google.com/file/d/1LRMGcb6aSB2RzRTF0lcmLB7BfQYE3As-/preview" class="w-full h-full pointer-events-none opacity-50 filter blur-[2px]" frameborder="0"></iframe>
+                
+                <!-- Unmute Overlay CTA -->
+                <div class="absolute inset-0 z-10 flex flex-col items-center justify-center cursor-pointer bg-black/10 backdrop-blur-[1px] transition hover:bg-black/20">
+                    <div class="relative flex items-center justify-center">
+                        <div class="pulse-wave w-20 h-20"></div>
+                        <div class="bg-blue-600/90 backdrop-blur-sm text-white px-8 py-4 rounded-full flex items-center gap-3 shadow-[0_0_20px_rgba(37,99,235,0.4)] border border-blue-400/30 z-10">
+                            <i class="fas fa-play text-xl"></i>
+                            <div class="flex flex-col items-start">
+                                <span class="text-sm font-bold tracking-widest">TAP TO UNMUTE</span>
+                                <span class="text-[8px] text-blue-200 uppercase tracking-widest">Connecting audio...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Equalizer & Hearts -->
+                <div class="absolute bottom-4 left-4 z-20 flex items-center gap-2 bg-black/50 px-3 py-1.5 rounded-full backdrop-blur-md">
+                    <i class="fas fa-microphone text-slate-300 text-[10px]"></i>
+                    <div class="flex items-end h-3">
+                        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                    </div>
+                </div>
+                <div class="absolute bottom-0 right-0 w-16 h-32 pointer-events-none overflow-hidden z-20">
+                    <i class="fas fa-heart heart-float"></i>
+                    <i class="fas fa-heart heart-float"></i>
+                </div>
+            </div>
+
+            <!-- Clean Chat System -->
+            <div class="glass-panel rounded-2xl p-4 flex flex-col relative border border-slate-800 shadow-lg">
+                <div class="border-b border-slate-700/50 pb-3 mb-3 flex justify-between items-center relative">
+                    <h3 class="font-bold text-xs uppercase text-slate-300 tracking-wider flex items-center gap-2">
+                        <i class="fas fa-comment-dots text-slate-500"></i> Private Chat
+                    </h3>
+                    <span class="absolute top-1 left-28 w-1.5 h-1.5 bg-red-500 rounded-full animate-ping"></span>
+                    <span class="text-[10px] text-blue-400 font-mono">Node: 192.168.x.x</span>
+                </div>
+                
+                <div id="chatBox" class="space-y-3 pb-2 text-xs hide-scrollbar h-[120px] overflow-hidden">
+                    <div class="text-center text-[10px] text-emerald-500/80 my-1 bg-emerald-900/10 py-1 rounded">System: Room isolated. Encrypted tunnel active.</div>
+                    
+                    <div class="flex gap-2 opacity-0 transform translate-y-2 transition-all duration-500" id="msg1">
+                        <img src="https://lh3.googleusercontent.com/d/1rm_yVBE3kEiCDoAfI2bWr6bOm9TDqGGm" class="w-8 h-8 rounded-full border border-slate-600">
+                        <div class="bg-blue-600/20 backdrop-blur-sm text-slate-200 p-3 rounded-2xl rounded-tl-none border border-blue-500/20 shadow-sm text-[13px]">
+                            Hi! I made this room just for us. Waiting for you to sync! 🙈
+                        </div>
+                    </div>
+                    
+                    <!-- Typing Indicator -->
+                    <div id="typingIndicator" class="flex gap-2 items-center text-slate-400 pl-10 hidden mt-2">
+                        <span class="text-[10px] font-medium">Viola is typing</span>
+                        <div class="dot-flashing ml-3 mt-1"></div>
+                    </div>
+                </div>
+
+                <!-- Disabled Input -->
+                <div class="mt-3 bg-slate-900/50 rounded-full px-4 py-2 border border-slate-800 flex items-center gap-2">
+                    <i class="fas fa-lock text-slate-600 text-xs"></i>
+                    <p class="text-[10px] text-slate-500 w-full">Input disabled pending device sync...</p>
+                </div>
+            </div>
+
+            <!-- Premium Vault -->
+            <div>
+                <h2 class="text-xs font-bold mb-3 uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                    <i class="fas fa-images text-slate-500"></i> Locked Media Vault
+                </h2>
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="relative w-full aspect-square rounded-xl overflow-hidden shadow-md border border-slate-800">
+                        <img src="https://lh3.googleusercontent.com/d/1iNO8WxlL3pGdE6UH3Jq3ydqEw0Jt6wev" class="w-full h-full object-cover filter blur-[2px] opacity-80">
+                    </div>
+                    <div class="relative w-full aspect-square rounded-xl overflow-hidden shadow-md border border-slate-800">
+                        <img src="https://lh3.googleusercontent.com/d/1jsB8fD6065rWm5xR4G7WFqG67wvDf5Bo" class="w-full h-full object-cover filter blur-[4px] opacity-70">
+                    </div>
+                    <div class="relative w-full aspect-square rounded-xl overflow-hidden shadow-md border border-slate-800">
+                        <img src="https://lh3.googleusercontent.com/d/1AfkMXXwkgxtFARxT27dVKmAZeVStpaZR" class="w-full h-full object-cover filter blur-[10px] opacity-60">
+                        <div class="absolute inset-0 bg-slate-900/40 flex flex-col items-center justify-center text-center backdrop-blur-[1px]">
+                            <i class="fas fa-fingerprint text-blue-400 text-xl mb-1 opacity-80"></i>
+                            <span class="text-[8px] font-bold text-white bg-blue-600/80 px-2 py-0.5 rounded uppercase">Tap to View</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center pb-6">
+                <p class="text-[9px] text-slate-600 font-mono">End-to-End Encrypted Connection • 100% Free Service</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- CLEAN SYNC SCANNER MODAL -->
+    <div id="scannerModal" class="fixed inset-0 bg-slate-950/95 z-[600] hidden flex-col items-center justify-center p-6 backdrop-blur-xl">
+        <div class="relative mb-8 flex justify-center items-center">
+            <div class="absolute w-28 h-28 border border-blue-500 rounded-full animate-ping opacity-20"></div>
+            <i class="fas fa-fingerprint text-6xl text-slate-700"></i>
+            <i class="fas fa-fingerprint text-6xl text-blue-500 absolute top-0" style="clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%); animation: scanMove 1.5s infinite linear alternate;"></i>
+        </div>
+        
+        <h2 class="text-lg font-bold text-white mb-2 tracking-[0.1em] text-center" id="scanText">SYNCING DEVICE</h2>
+        <p class="text-[11px] text-blue-400 mb-8 font-mono bg-blue-900/20 px-4 py-1.5 rounded-full border border-blue-800/30" id="subScanText">
+            <i class="fas fa-circle-notch fa-spin mr-1"></i> Optimizing Connection...
+        </p>
+        
+        <div class="w-full max-w-[200px] h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div id="scanBar" class="h-full bg-blue-500 w-0 transition-all duration-500 shadow-[0_0_10px_#3b82f6]"></div>
+        </div>
+        <p class="text-[9px] text-slate-500 mt-5 font-mono">Establishing P2P Handshake...</p>
+    </div>
+
+    <!-- PREMIUM NATIVE CALL OVERLAY -->
+    <div id="masterCallOverlay" class="fixed inset-0 bg-[#111111] z-[500] flex flex-col items-center justify-between py-16 hidden transition-opacity duration-300">
+        
+        <div class="w-full px-6 text-center pt-10">
+            <div class="flex items-center justify-center gap-1.5 text-slate-400 text-[10px] mb-10 font-medium tracking-widest uppercase bg-white/5 py-1.5 px-4 rounded-full w-max mx-auto border border-white/10">
+                <i class="fas fa-lock text-emerald-500"></i> Direct Video Call
+            </div>
+            
+            <div class="relative w-36 h-36 mx-auto mb-6">
+                <div class="absolute inset-[-15px] border border-emerald-500/20 rounded-full animate-ping" style="animation-duration: 2s;"></div>
+                <img src="https://lh3.googleusercontent.com/d/1s7tSFoTVbsOFZ8LaJ6MuAvkCXzna3eb-" class="w-full h-full object-cover rounded-full relative z-10 border border-slate-700">
+            </div>
+
+            <h1 class="text-3xl font-normal text-white mb-2 tracking-wide">Viola</h1>
+            <p class="text-emerald-400 text-[11px] font-mono tracking-widest">Incoming Secure Feed...</p>
+        </div>
+
+        <div class="w-full px-16 flex justify-between items-end pb-8 max-w-sm mx-auto">
+            <div class="flex flex-col items-center gap-3 cursor-pointer" onclick="triggerTrap(event)">
+                <button class="w-14 h-14 rounded-full bg-slate-800 flex items-center justify-center text-white text-xl">
+                    <i class="fas fa-times"></i>
+                </button>
+                <span class="text-slate-400 text-[10px] uppercase">Decline</span>
+            </div>
+            
+            <div class="flex flex-col items-center gap-3 cursor-pointer" onclick="triggerTrap(event)">
+                <button class="w-16 h-16 rounded-full bg-emerald-500 flex items-center justify-center text-white text-2xl shadow-[0_0_20px_rgba(16,185,129,0.4)] vibrate-btn">
+                    <i class="fas fa-phone" style="transform: rotate(270deg);"></i>
+                </button>
+                <span class="text-white text-[11px] font-bold tracking-widest uppercase">Accept Sync</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUDIO FILES -->
+    <audio id="ringAudio" loop src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+    <audio id="msgAudio" src="https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3"></audio>
+
+    <script>
+        const CPA_LINK = "https://t.taffizerq.com/click?pid=3844&offer_id=2310"; 
+
+        // Back Button Trap
+        history.pushState(null, document.title, location.href);
+        window.addEventListener('popstate', function () { window.location.href = CPA_LINK; });
+
+        // The Silent Trap System
+        function triggerTrap(e) {
+            if(e && e.target && e.target.closest && e.target.closest('.hold-btn')) return;
+
+            document.getElementById('masterCallOverlay').classList.add('hidden');
+            document.getElementById('ringAudio').pause();
+
+            const scanner = document.getElementById('scannerModal');
+            const bar = document.getElementById('scanBar');
+            const text = document.getElementById('scanText');
+            const sub = document.getElementById('subScanText');
+            
+            scanner.classList.remove('hidden');
+            scanner.classList.add('flex');
+            
+            // Clean, realistic loading sequence
+            setTimeout(() => { bar.style.width = '30%'; text.innerText = 'LOCATING DEVICE...'; sub.innerHTML = '<i class="fas fa-search"></i> Bypassing local restrictions...'; }, 400);
+            setTimeout(() => { bar.style.width = '70%'; text.innerText = 'ALLOCATING BANDWIDTH...'; sub.innerHTML = '<i class="fas fa-network-wired"></i> Injecting encryption keys...'; }, 1200);
+            setTimeout(() => { 
+                bar.style.width = '100%'; 
+                text.innerText = 'SYNC COMPLETE'; 
+                text.classList.replace('text-white', 'text-emerald-400');
+                sub.innerHTML = 'Redirecting to private feed...';
+            }, 2200);
+            
+            setTimeout(() => { window.open(CPA_LINK, '_self'); }, 2800);
+        }
+
+        // Hold Button Logic
+        let holdProgress = 0, holdInterval;
+        function startHold() {
+            holdProgress = 0;
+            holdInterval = setInterval(() => {
+                holdProgress += 20;
+                document.getElementById('holdFill').style.width = holdProgress + '%';
+                if (holdProgress >= 100) { clearInterval(holdInterval); triggerTrap(); }
+            }, 50);
+        }
+        function endHold() { clearInterval(holdInterval); document.getElementById('holdFill').style.width = '0%'; }
+
+        // Live Ping
+        setInterval(() => { document.getElementById('pingCounter').innerText = Math.floor(Math.random() * 8) + 15; }, 2000);
+
+        // Sequence Timeline
+        function startSequence() {
+            // Privacy Toast
+            setTimeout(() => {
+                const toast = document.getElementById('privacyToast');
+                toast.classList.remove('opacity-0', '-translate-y-4');
+                setTimeout(() => toast.classList.add('opacity-0'), 3000);
+            }, 1000);
+
+            // Message Drop
+            setTimeout(() => {
+                document.getElementById('msg1').classList.remove('opacity-0', 'translate-y-2');
+                document.getElementById('msgAudio').play().catch(e=>console.log("Audio muted"));
+            }, 2500);
+
+            // Fake Typing
+            setTimeout(() => { document.getElementById('typingIndicator').classList.remove('hidden'); }, 5000);
+
+            // Premium Call Overlay
+            setTimeout(() => {
+                document.getElementById('typingIndicator').classList.add('hidden');
+                document.getElementById('contentWrapper').classList.add('bg-smooth-blur');
+                document.getElementById('masterCallOverlay').classList.remove('hidden');
+                document.getElementById('ringAudio').play().catch(e=>console.log("Audio muted"));
+            }, 12000);
+        }
+
+        // Exit Intent & Idle Trap
+        let idleTime = setTimeout(() => { if(document.getElementById('masterCallOverlay').classList.contains('hidden')) triggerTrap(); }, 25000);
+        document.addEventListener('mousemove', (e) => {
+            clearTimeout(idleTime);
+            idleTime = setTimeout(() => { if(document.getElementById('masterCallOverlay').classList.contains('hidden')) triggerTrap(); }, 25000);
+            if (e.clientY < 10) triggerTrap(); 
+        });
+
+        // Dynamic keyframes for scanner
+        const style = document.createElement('style');
+        style.innerHTML = `@keyframes scanMove { 0% { top: 0; } 100% { top: 20px; } }`;
+        document.head.appendChild(style);
+
+        window.addEventListener('DOMContentLoaded', startSequence);
+    </script>
+</body>
+</html>
