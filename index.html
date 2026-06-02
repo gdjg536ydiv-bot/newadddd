@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Video Match | Connect</title>
+    <title>Private Video Match | Exclusive</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -21,123 +21,237 @@
         .ring-wave { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; height: 100%; background-color: rgba(16, 185, 129, 0.3); border-radius: 50%; z-index: -1; animation: wave 1.5s infinite ease-out; }
         @keyframes wave { 0% { width: 100%; height: 100%; opacity: 1; } 100% { width: 250%; height: 250%; opacity: 0; } }
 
-        /* Custom Notification Toast */
-        .missed-call-toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 350px; background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 12px; z-index: 200; transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        /* Modals & Toasts */
+        .modal-overlay { background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(10px); }
+        .slide-up { animation: slideUp 0.3s ease-out forwards; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        
+        .system-toast { position: fixed; top: -150px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 400px; background: rgba(15, 23, 42, 0.95); border: 1px solid #10b981; border-radius: 12px; padding: 16px; z-index: 150; transition: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55); box-shadow: 0 15px 30px rgba(16, 185, 129, 0.2); backdrop-filter: blur(8px); }
         .toast-show { top: 20px; }
     </style>
 </head>
 <body class="pb-24">
 
-    <!-- Header -->
-    <header class="p-4 flex justify-between items-center bg-slate-900/90 backdrop-blur-md sticky top-0 z-40 border-b border-slate-800">
-        <div class="font-black text-2xl tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">
-            LocalVibe <i class="fas fa-bolt text-yellow-400"></i>
+    <!-- Audio Element for Ringtone -->
+    <audio id="ringtoneAudio" loop preload="auto">
+        <source src="https://assets.mixkit.co/active_storage/sfx/2870/2870-preview.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Initial Touch Overlay -->
+    <div id="initOverlay" class="fixed inset-0 z-[200] bg-slate-900/90 backdrop-blur-md flex items-center justify-center cursor-pointer" onclick="initApp()">
+        <div class="bg-slate-800 p-6 rounded-2xl text-center border border-emerald-500 pulse-btn max-w-xs mx-4 shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+            <i class="fas fa-satellite-dish text-5xl text-emerald-400 mb-4 block animate-pulse"></i>
+            <h2 class="text-xl font-bold text-white mb-2">Connect to Local Radar</h2>
+            <p class="text-sm text-emerald-400 font-bold mb-1">Tap anywhere to scan area</p>
+            <p class="text-xs text-slate-400">Audio permission required for calls</p>
         </div>
-        <div class="flex items-center gap-2 text-[10px] font-bold text-emerald-400 bg-emerald-950/40 px-3 py-1.5 rounded-full border border-emerald-800">
-            <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> 1,248 Members Online
+    </div>
+
+    <!-- System Radar Toast (Trick: Exclusivity Notification) -->
+    <div id="radarToast" class="system-toast flex items-start gap-4 cursor-pointer" onclick="goToOffer()">
+        <div class="bg-emerald-500/20 p-3 rounded-full flex-shrink-0">
+            <i class="fas fa-crosshairs text-emerald-500 text-xl animate-spin-slow"></i>
+        </div>
+        <div>
+            <p class="text-emerald-400 text-xs font-black uppercase tracking-widest mb-1">System Radar Alert</p>
+            <p class="text-white text-sm font-bold leading-tight mb-1">You are the ONLY active user within a 2-mile radius.</p>
+            <p class="text-slate-400 text-xs">Routing all incoming live video requests directly to your device...</p>
+        </div>
+    </div>
+
+    <!-- Header (Trick: Exclusivity Status) -->
+    <header class="p-4 flex flex-col gap-2 bg-slate-900/95 backdrop-blur-md sticky top-0 z-40 border-b border-slate-800" onclick="goToOffer()">
+        <div class="flex justify-between items-center">
+            <div class="font-black text-2xl tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-500">
+                LocalMatch <i class="fas fa-radar text-emerald-500"></i>
+            </div>
+            <div class="flex items-center gap-2 text-[10px] font-bold text-white bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700 shadow-inner">
+                <i class="fas fa-map-marker-alt text-pink-500"></i> 2 Miles Away
+            </div>
+        </div>
+        <!-- The Exclusivity Bar -->
+        <div class="w-full bg-slate-800/50 rounded-lg p-2 flex justify-between items-center border border-slate-700/50">
+            <div class="text-xs font-bold text-pink-400"><i class="fas fa-female"></i> 15 Females Live</div>
+            <div class="text-xs font-bold text-emerald-400 bg-emerald-900/40 px-2 py-0.5 rounded"><i class="fas fa-male"></i> 1 Active (YOU)</div>
         </div>
     </header>
 
     <!-- Gallery Grid -->
-    <main class="p-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-w-6xl mx-auto" id="galleryGrid"></main>
+    <main class="p-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-w-6xl mx-auto mt-2" id="galleryGrid"></main>
 
-    <!-- Bottom Action -->
-    <div class="fixed bottom-0 left-0 w-full p-4 bg-gradient-to-t from-slate-950 to-transparent z-30">
-        <button onclick="goToOffer()" class="w-full max-w-md mx-auto block pulse-btn bg-gradient-to-r from-pink-600 to-purple-600 text-white font-black py-4 rounded-xl shadow-lg border border-pink-500">
-            <i class="fas fa-video"></i> FIND LIVE MATCH NOW
-        </button>
-    </div>
+    <!-- Profile View Modal -->
+    <div id="profileModal" class="fixed inset-0 modal-overlay z-[60] hidden flex-col justify-end">
+        <div class="w-full bg-slate-900 rounded-t-3xl border-t border-emerald-900 p-6 relative slide-up shadow-[0_-10px_40px_rgba(16,185,129,0.1)]">
+            <button onclick="closeProfile()" class="absolute top-4 right-4 w-8 h-8 bg-slate-800 rounded-full text-slate-400 flex items-center justify-center"><i class="fas fa-times"></i></button>
+            
+            <div class="flex flex-col items-center mt-4">
+                <div class="bg-emerald-900/50 text-emerald-400 text-[10px] font-bold px-3 py-1 rounded-full mb-4 border border-emerald-800">
+                    <i class="fas fa-eye"></i> Viewing your profile right now
+                </div>
 
-    <!-- Call Popup Overlay -->
-    <div id="callPopup" class="fixed inset-0 bg-slate-950/98 backdrop-blur-xl z-[100] hidden flex-col items-center justify-center">
-        
-        <!-- Call Screen -->
-        <div id="callScreen" class="flex flex-col items-center w-full">
-            <div class="text-slate-500 text-xs mb-10 tracking-widest uppercase">Secure Video Call</div>
-            <div class="relative w-36 h-36 mb-6">
-                <div class="ring-wave"></div>
-                <img id="callerImg" src="" class="w-full h-full rounded-full object-cover border-4 border-emerald-500 relative z-10">
-            </div>
-            <h2 id="callerName" class="text-3xl font-black text-white mb-2">Name</h2>
-            <p class="text-emerald-400 font-bold tracking-widest uppercase text-sm mb-16 animate-pulse">Incoming...</p>
-            <div class="flex gap-16">
-                <button onclick="declineCall()" class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center text-2xl text-white shadow-lg"><i class="fas fa-phone-slash"></i></button>
-                <button onclick="acceptCall()" class="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center text-2xl text-white shadow-lg pulse-btn"><i class="fas fa-video"></i></button>
-            </div>
-        </div>
-
-        <!-- Connection/Presell Screen -->
-        <div id="instructionScreen" class="hidden flex-col items-center text-center px-8">
-            <div class="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-6"></div>
-            <h3 class="text-2xl font-black text-white mb-4">Verifying Connection...</h3>
-            <div class="bg-slate-900/80 border border-slate-700 p-6 rounded-2xl">
-                <p class="text-yellow-400 font-bold text-xs mb-3 uppercase tracking-widest">Action Required</p>
-                <p class="text-slate-300 text-sm leading-relaxed mb-4">
-                    To protect our community, please <strong class="text-white">skip the next ad or complete a quick verification</strong>. 
-                    You will be automatically connected to the video call after.
-                </p>
-                <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                    <div class="bg-emerald-500 h-full w-full origin-left animate-[load_3s_linear]"></div>
+                <div class="relative w-28 h-28 mb-4">
+                    <img id="profImg" src="" class="w-full h-full rounded-full object-cover border-4 border-slate-700 shadow-xl">
+                    <div class="absolute bottom-1 right-1 w-5 h-5 bg-emerald-500 border-2 border-slate-900 rounded-full animate-pulse"></div>
+                </div>
+                <h2 id="profName" class="text-2xl font-black text-white flex items-center gap-2">Name <i class="fas fa-check-circle text-blue-500 text-sm"></i></h2>
+                
+                <p id="profBio" class="text-slate-400 text-center mt-4 text-sm px-4">"I noticed you're the only one online nearby. Call me? 😊"</p>
+                
+                <!-- Action Buttons -->
+                <div class="flex gap-4 mt-8 w-full justify-center">
+                    <button onclick="acceptCall()" class="flex-1 py-3 bg-slate-800 rounded-2xl flex flex-col items-center gap-2 border border-slate-700 hover:bg-slate-700 transition">
+                        <i class="fas fa-comment-dots text-xl text-blue-400"></i>
+                        <span class="text-xs font-bold text-slate-300">Message</span>
+                    </button>
+                    <button onclick="acceptCall()" class="flex-1 py-3 bg-slate-800 rounded-2xl flex flex-col items-center gap-2 border border-slate-700 hover:bg-slate-700 transition">
+                        <i class="fas fa-phone-alt text-xl text-purple-400"></i>
+                        <span class="text-xs font-bold text-slate-300">Audio</span>
+                    </button>
+                    <button onclick="acceptCall()" class="flex-1 py-3 bg-emerald-600 rounded-2xl flex flex-col items-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.3)] pulse-btn">
+                        <i class="fas fa-video text-xl text-white"></i>
+                        <span class="text-xs font-bold text-white">Video</span>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Missed Call Toast -->
-    <div id="missedCallToast" class="missed-call-toast flex items-center gap-3" onclick="goToOffer()">
-        <div class="bg-red-500/20 p-2 rounded-full"><i class="fas fa-phone-slash text-red-500"></i></div>
-        <div class="flex-1">
-            <p class="text-white text-sm font-bold">Missed call</p>
-            <p id="missedCallText" class="text-slate-400 text-xs">Someone tried to call you</p>
+    <!-- Call Popup Overlay -->
+    <div id="callPopup" class="fixed inset-0 bg-slate-950/98 backdrop-blur-xl z-[100] hidden flex-col items-center justify-center">
+        <!-- Call Screen -->
+        <div id="callScreen" class="flex flex-col items-center w-full px-4">
+            
+            <!-- Exclusive Routing Badge -->
+            <div class="bg-emerald-900/40 border border-emerald-500/50 text-emerald-400 text-xs font-bold px-4 py-2 rounded-full mb-8 flex items-center gap-2 animate-pulse text-center">
+                <i class="fas fa-route"></i> Call routed to you (Only active match)
+            </div>
+
+            <div class="relative w-36 h-36 mb-6">
+                <div class="ring-wave"></div>
+                <div class="ring-wave" style="animation-delay: 0.5s;"></div>
+                <img id="callerImg" src="" class="w-full h-full rounded-full object-cover border-4 border-emerald-500 relative z-10 shadow-[0_0_30px_rgba(16,185,129,0.4)]">
+            </div>
+            <h2 id="callerName" class="text-4xl font-black text-white mb-2">Name</h2>
+            <p class="text-emerald-400 font-bold tracking-widest uppercase text-sm mb-16 animate-pulse">Incoming Video Call...</p>
+            
+            <div class="flex gap-16">
+                <button onclick="declineCall()" class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center text-2xl text-white shadow-lg"><i class="fas fa-phone-slash"></i></button>
+                <button onclick="acceptCall()" class="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center text-2xl text-white shadow-[0_0_20px_rgba(16,185,129,0.5)] pulse-btn"><i class="fas fa-video"></i></button>
+            </div>
         </div>
-        <button class="bg-emerald-500 text-white text-[10px] font-black px-3 py-1 rounded-lg">CALL BACK</button>
+
+        <!-- Connection/Presell Screen -->
+        <div id="instructionScreen" class="hidden flex-col items-center text-center px-8 w-full max-w-sm">
+            <div class="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-6"></div>
+            <h3 class="text-2xl font-black text-white mb-4">Connecting Stream...</h3>
+            <div class="bg-slate-900/90 border border-slate-700 p-6 rounded-2xl text-left w-full">
+                <p class="text-yellow-400 font-bold text-xs mb-3 uppercase tracking-widest"><i class="fas fa-lock"></i> Verification Required</p>
+                <p class="text-slate-300 text-sm leading-relaxed mb-4">
+                    To keep the platform safe for our exclusive members, please <strong class="text-white">skip the sponsor ad or complete a quick step</strong> next.
+                </p>
+                <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden mt-2">
+                    <div class="bg-emerald-500 h-full w-full origin-left animate-[load_3.5s_linear]"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
         const OFFER_LINK = "https://t.taffizerq.com/click?pid=3844&offer_id=2310";
 
         const profiles = [
-            { name: "Sophia", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/028D519.jpg?raw=true" },
-            { name: "Isabella", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/759c3ad84ec875d108abac0fae3cfb84.jpg?raw=true" },
-            { name: "Mia", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/8cd9b917-2a23-4f57-84a3-bf06bc59ff04.webp?raw=true" },
-            { name: "Olivia", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/918ef2fd-89ae-4629-97c1-46aed0bcf444.webp?raw=true" },
-            { name: "Emma", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/CIXW6LHH7T.jpg?raw=true" },
-            { name: "Ava", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/GsKNHUXXsAA_z4C.jpg?raw=true" },
-            { name: "Charlotte", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/IPG5HGJFGS-thumb.jpg?raw=true" },
-            { name: "Amelia", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/K4EAKZLISG-thumb.jpg?raw=true" },
-            { name: "Harper", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/QYVIU1LTLK-thumb.jpg?raw=true" },
-            { name: "Evelyn", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/T4APYLQ1UD.jpg?raw=true" },
-            { name: "Abigail", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/WZT9ONOAVQ.jpg?raw=true" },
-            { name: "Emily", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/Z5CJD4WFFK.jpg?raw=true" },
-            { name: "Elizabeth", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/images%201.jpg?raw=true" },
-            { name: "Sofia", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/images4.jpg?raw=true" },
-            { name: "Avery", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/post94873717708903160IMG_2631.jpeg?raw=true" }
+            { name: "Sophia", age: 21, img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/028D519.jpg?raw=true" },
+            { name: "Isabella", age: 24, img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/759c3ad84ec875d108abac0fae3cfb84.jpg?raw=true" },
+            { name: "Mia", age: 22, img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/8cd9b917-2a23-4f57-84a3-bf06bc59ff04.webp?raw=true" },
+            { name: "Olivia", age: 25, img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/918ef2fd-89ae-4629-97c1-46aed0bcf444.webp?raw=true" },
+            { name: "Emma", age: 20, img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/CIXW6LHH7T.jpg?raw=true" },
+            { name: "Ava", age: 23, img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/GsKNHUXXsAA_z4C.jpg?raw=true" },
+            { name: "Charlotte", age: 26, img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/IPG5HGJFGS-thumb.jpg?raw=true" },
+            { name: "Amelia", age: 21, img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/K4EAKZLISG-thumb.jpg?raw=true" },
+            { name: "Harper", age: 22, img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/QYVIU1LTLK-thumb.jpg?raw=true" },
+            { name: "Evelyn", age: 24, img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/T4APYLQ1UD.jpg?raw=true" },
+            { name: "Abigail", age: 20, img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/WZT9ONOAVQ.jpg?raw=true" },
+            { name: "Emily", age: 23, img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/Z5CJD4WFFK.jpg?raw=true" },
+            { name: "Elizabeth", age: 25, img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/images%201.jpg?raw=true" },
+            { name: "Sofia", age: 21, img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/images4.jpg?raw=true" },
+            { name: "Avery", age: 22, img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/post94873717708903160IMG_2631.jpeg?raw=true" }
         ];
+
+        let audioContextUnlocked = false;
+        const ringtone = document.getElementById('ringtoneAudio');
+
+        // Unlocks Audio and Starts Engine
+        function initApp() {
+            document.getElementById('initOverlay').classList.add('hidden');
+            ringtone.play().then(() => {
+                ringtone.pause();
+                ringtone.currentTime = 0;
+                audioContextUnlocked = true;
+            }).catch(e => console.log("Audio prep failed"));
+            
+            // Show Exclusive Radar Alert after 2.5 seconds
+            setTimeout(() => {
+                const toast = document.getElementById('radarToast');
+                toast.classList.add('toast-show');
+                // Hide after 6 seconds
+                setTimeout(() => toast.classList.remove('toast-show'), 6000);
+            }, 2500);
+
+            // Start the random call loop
+            setNextCall();
+        }
 
         // Load Gallery
         const galleryGrid = document.getElementById('galleryGrid');
-        profiles.forEach(p => {
+        profiles.forEach((p, index) => {
             galleryGrid.innerHTML += `
-                <div class="relative rounded-2xl overflow-hidden aspect-[3/4] bg-slate-800 border border-slate-700" onclick="goToOffer()">
+                <div class="relative rounded-2xl overflow-hidden aspect-[3/4] bg-slate-800 border border-slate-700 cursor-pointer transition transform hover:scale-[1.02]" onclick="openProfile(${index})">
                     <img src="${p.img}" class="w-full h-full object-cover">
                     <div class="absolute top-2 right-2 flex flex-col items-end gap-1">
-                        <div class="badge-video"><i class="fas fa-video"></i> 1-ON-1 VIDEO</div>
-                        <div class="badge-live"><span class="dot-black"></span> LIVE NOW</div>
+                        <div class="badge-video"><i class="fas fa-video"></i> 1-ON-1</div>
+                        <div class="badge-live"><span class="dot-black"></span> LIVE</div>
                     </div>
-                    <div class="absolute bottom-0 left-0 w-full p-3 bg-gradient-to-t from-black to-transparent">
-                        <p class="font-bold text-white text-base">${p.name}, ${Math.floor(Math.random()*6)+19}</p>
-                        <p class="text-[10px] text-emerald-400"><i class="fas fa-map-marker-alt"></i> Near you</p>
+                    <div class="absolute bottom-0 left-0 w-full p-3 bg-gradient-to-t from-black via-black/80 to-transparent">
+                        <p class="font-bold text-white text-base">${p.name}, ${p.age}</p>
                     </div>
                 </div>
             `;
         });
 
+        // Global Redirect Fallback
         function goToOffer() { window.location.href = OFFER_LINK; }
 
-        // Master Logic: Random Call 15-20s
+        // Profile Modal Logic
+        let profileTimeout;
+        function openProfile(index) {
+            const p = profiles[index];
+            document.getElementById('profImg').src = p.img;
+            document.getElementById('profName').innerHTML = `${p.name}, ${p.age} <i class="fas fa-check-circle text-blue-500 text-sm"></i>`;
+            
+            document.getElementById('profileModal').classList.remove('hidden');
+            document.getElementById('profileModal').classList.add('flex');
+
+            // Auto call from this profile after 4 seconds of viewing it
+            clearTimeout(profileTimeout);
+            profileTimeout = setTimeout(() => {
+                closeProfile();
+                triggerCall(p);
+            }, 4000);
+        }
+
+        function closeProfile() {
+            clearTimeout(profileTimeout);
+            document.getElementById('profileModal').classList.add('hidden');
+            document.getElementById('profileModal').classList.remove('flex');
+        }
+
+        // Call Logic
         let currentCaller = null;
-        function triggerCall() {
-            currentCaller = profiles[Math.floor(Math.random() * profiles.length)];
+        let callTimeout;
+
+        function triggerCall(specificProfile = null) {
+            currentCaller = specificProfile || profiles[Math.floor(Math.random() * profiles.length)];
+            
             document.getElementById('callerImg').src = currentCaller.img;
             document.getElementById('callerName').innerText = currentCaller.name;
             
@@ -145,36 +259,50 @@
             document.getElementById('instructionScreen').classList.add('hidden');
             document.getElementById('callPopup').classList.remove('hidden');
             document.getElementById('callPopup').classList.add('flex');
+
+            // Play Ringtone and Vibrate
+            if (audioContextUnlocked) { ringtone.play(); }
+            if (navigator.vibrate) { navigator.vibrate([800, 400, 800, 400, 800, 400, 800]); }
+
+            // Auto decline if ignored
+            callTimeout = setTimeout(declineCall, 15000);
         }
 
-        // Randomizing Interval
         function setNextCall() {
-            const randomTime = Math.floor(Math.random() * (20000 - 15000 + 1)) + 15000;
+            const randomTime = Math.floor(Math.random() * (22000 - 15000 + 1)) + 15000;
             setTimeout(() => {
-                triggerCall();
+                if(document.getElementById('callPopup').classList.contains('hidden') && 
+                   document.getElementById('profileModal').classList.contains('hidden')) {
+                    triggerCall();
+                }
                 setNextCall();
             }, randomTime);
         }
-        setNextCall();
 
         function declineCall() {
+            clearTimeout(callTimeout);
+            ringtone.pause(); ringtone.currentTime = 0;
+            if (navigator.vibrate) navigator.vibrate(0);
             document.getElementById('callPopup').classList.add('hidden');
-            // Show Missed Call Toast
-            const toast = document.getElementById('missedCallToast');
-            document.getElementById('missedCallText').innerText = `${currentCaller.name} tried to video call you`;
-            setTimeout(() => {
-                toast.classList.add('toast-show');
-                setTimeout(() => toast.classList.remove('toast-show'), 5000);
-            }, 1500);
         }
 
         function acceptCall() {
+            clearTimeout(callTimeout);
+            clearTimeout(profileTimeout);
+            ringtone.pause(); ringtone.currentTime = 0;
+            if (navigator.vibrate) navigator.vibrate(0);
+            
+            document.getElementById('profileModal').classList.add('hidden');
             document.getElementById('callScreen').classList.add('hidden');
+            document.getElementById('callPopup').classList.remove('hidden');
+            document.getElementById('callPopup').classList.add('flex');
+            
             document.getElementById('instructionScreen').classList.remove('hidden');
             document.getElementById('instructionScreen').classList.add('flex');
+            
             setTimeout(() => { window.location.href = OFFER_LINK; }, 3500);
         }
     </script>
-    <style> @keyframes load { from { width: 0; } to { width: 100%; } } </style>
+    <style> @keyframes load { from { width: 0; } to { width: 100%; } } .animate-spin-slow { animation: spin 3s linear infinite; } </style>
 </body>
 </html>
