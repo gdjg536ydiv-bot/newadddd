@@ -3,199 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Local Matches | 1-on-1 Chat</title>
+    <title>Private Video Meetup - Live Now</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #0f172a; color: white; font-family: -apple-system, sans-serif; user-select: none; }
+        body { background-color: #020617; color: white; font-family: 'Inter', sans-serif; user-select: none; overflow-x: hidden; }
         
-        /* Smooth Heartbeat Animation */
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+
+        /* Badge Styles from your image */
+        .badge-video {
+            background-color: #a855f7; /* Purple */
+            color: white;
+            font-size: 10px;
+            font-weight: 900;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+        
+        .badge-live {
+            background-color: #10b981; /* Emerald Green */
+            color: black;
+            font-size: 10px;
+            font-weight: 900;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+        
+        .dot-black {
+            width: 10px;
+            height: 10px;
+            background-color: #000;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: inset 0px 0px 2px rgba(255,255,255,0.5);
+        }
+
+        /* Pulse Animations */
         .pulse-btn { animation: heartbeat 1.5s infinite; }
-        @keyframes heartbeat { 0% { transform: scale(1); } 14% { transform: scale(1.05); } 28% { transform: scale(1); } 42% { transform: scale(1.05); } 70% { transform: scale(1); } }
+        @keyframes heartbeat { 0% { transform: scale(1); } 14% { transform: scale(1.1); } 28% { transform: scale(1); } 42% { transform: scale(1.1); } 70% { transform: scale(1); } }
         
-        /* Live Dot Animation */
-        .live-dot { border-radius: 50%; background-color: #10b981; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); animation: pulse-green 2s infinite; }
-        @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); } 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+        .ring-wave {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 100%; height: 100%; background-color: rgba(16, 185, 129, 0.3);
+            border-radius: 50%; z-index: -1; animation: wave 1.5s infinite ease-out;
+        }
+        @keyframes wave { 0% { width: 100%; height: 100%; opacity: 1; } 100% { width: 250%; height: 250%; opacity: 0; } }
 
-        /* Fake Notifications */
-        .toast-notification { transform: translateY(100px); opacity: 0; transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
-        .toast-show { transform: translateY(0); opacity: 1; }
-
-        /* Blur Trick */
-        .premium-blur { filter: blur(8px); transition: filter 0.3s; }
-        .image-card:hover .premium-blur { filter: blur(0px); }
-        
-        .hide-scroll::-webkit-scrollbar { display: none; }
+        /* Loader */
+        .loader {
+            border: 4px solid rgba(255, 255, 255, 0.1); border-left-color: #10b981;
+            border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 15px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="hide-scroll pb-24">
+<body class="pb-20">
 
-    <!-- Urgency Top Bar (Trick 4) -->
-    <div class="bg-gradient-to-r from-pink-600 to-red-600 text-center py-2 text-xs font-bold tracking-wider sticky top-0 z-50 shadow-lg cursor-pointer" onclick="goToOffer()">
-        <i class="fas fa-clock"></i> FREE REGISTRATION CLOSES IN: <span id="timer" class="text-yellow-300">05:00</span>
-    </div>
-
-    <!-- Header -->
-    <header class="p-4 flex justify-between items-center border-b border-slate-800 bg-slate-900/90 backdrop-blur-md sticky top-[32px] z-40 cursor-pointer" onclick="goToOffer()">
-        <div class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
-            LocalMeet <i class="fas fa-fire text-orange-500"></i>
+    <!-- Top Navigation -->
+    <header class="p-4 flex justify-between items-center bg-slate-900/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-800" onclick="goToOffer()">
+        <div class="font-black text-2xl tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500">
+            VibeChat <i class="fas fa-video text-purple-500 text-lg"></i>
         </div>
-        <div class="flex items-center gap-2 text-xs text-emerald-400 font-bold bg-emerald-900/30 px-3 py-1.5 rounded-full border border-emerald-800">
-            <span class="w-2 h-2 live-dot"></span> 84 Online Now
+        <div class="bg-slate-800 text-white text-xs px-3 py-2 rounded-full font-bold border border-slate-700">
+            <i class="fas fa-search"></i> Searching near you...
         </div>
     </header>
 
-    <!-- Typing Indicator (Trick 7) -->
-    <div class="text-center py-3 text-xs text-slate-400 italic bg-slate-900 cursor-pointer" onclick="goToOffer()">
-        <i class="fas fa-comment-dots text-pink-500 animate-bounce"></i> Someone near you is typing...
-    </div>
+    <!-- Main Gallery -->
+    <main class="p-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-w-6xl mx-auto" id="galleryGrid" onclick="goToOffer()"></main>
 
-    <!-- Image Gallery Grid (Trick 1: Everywhere is a button) -->
-    <main class="p-3 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-w-5xl mx-auto" onclick="goToOffer()">
-        
-        <!-- Script generated images will go here -->
-        <div id="galleryGrid" class="contents"></div>
-
-    </main>
-
-    <!-- Sticky Bottom CTA (Trick 12) -->
-    <div class="fixed bottom-0 left-0 w-full p-4 bg-gradient-to-t from-slate-950 via-slate-900 to-transparent z-40">
-        <button onclick="goToOffer()" class="w-full max-w-md mx-auto block pulse-btn bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(236,72,153,0.5)] border border-pink-400 text-lg">
-            <i class="fas fa-video"></i> START LIVE VIDEO CHAT NOW
+    <!-- Sticky Bottom Join Button -->
+    <div class="fixed bottom-0 left-0 w-full p-4 bg-gradient-to-t from-slate-950 to-transparent z-30">
+        <button onclick="goToOffer()" class="w-full max-w-md mx-auto block pulse-btn bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black py-4 rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.4)] text-lg border border-green-400">
+            <i class="fas fa-random"></i> START RANDOM VIDEO CHAT
         </button>
     </div>
 
-    <!-- Social Proof Notification (Trick 6) -->
-    <div id="toast" class="toast-notification fixed bottom-24 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-slate-800 border border-slate-600 rounded-lg p-3 shadow-2xl z-50 flex items-center gap-3 cursor-pointer" onclick="goToOffer()">
-        <img id="toastImg" src="" class="w-10 h-10 rounded-full object-cover border-2 border-emerald-500">
-        <div>
-            <p id="toastText" class="text-sm font-bold text-white"></p>
-            <p class="text-xs text-emerald-400">Just now</p>
-        </div>
-    </div>
-
-    <!-- Idle Incoming Call Popup (Trick 9) -->
-    <div id="callPopup" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-[100] hidden flex-col items-center justify-center cursor-pointer" onclick="goToOffer()">
-        <div class="w-24 h-24 rounded-full border-4 border-emerald-500 p-1 mb-4 relative pulse-btn">
-            <img src="https://github.com/mizan000321-ops/newv/blob/main/HBuOij0WoAAfrI3.jpg?raw=true" class="w-full h-full rounded-full object-cover">
-            <div class="absolute inset-0 rounded-full border-4 border-emerald-500 animate-ping"></div>
-        </div>
-        <h2 class="text-2xl font-bold text-white mb-1">Emma, 22</h2>
-        <p class="text-emerald-400 mb-8 tracking-widest uppercase text-sm animate-pulse">Incoming Video Call...</p>
+    <!-- The Master Call Popup (Hidden by default) -->
+    <div id="callPopup" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-[100] hidden flex-col items-center justify-center">
         
-        <div class="flex gap-8">
-            <div class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center text-2xl shadow-[0_0_15px_rgba(239,68,68,0.5)]">
-                <i class="fas fa-phone-slash"></i>
+        <!-- Call Screen UI -->
+        <div id="callScreen" class="flex flex-col items-center w-full px-6">
+            <div class="text-slate-400 text-xs mb-8 flex items-center gap-2">
+                <i class="fas fa-lock"></i> End-to-end encrypted
             </div>
-            <div class="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center text-2xl shadow-[0_0_15px_rgba(16,185,129,0.5)] pulse-btn">
-                <i class="fas fa-phone"></i>
+
+            <div class="relative w-32 h-32 mb-4">
+                <div class="ring-wave"></div>
+                <div class="ring-wave" style="animation-delay: 0.5s;"></div>
+                <img id="callerImg" src="" class="w-full h-full rounded-full object-cover border-4 border-emerald-500 relative z-10 shadow-2xl">
+            </div>
+
+            <h2 id="callerName" class="text-3xl font-black text-white mb-2 tracking-wide">Name</h2>
+            <p class="text-emerald-400 font-bold tracking-widest uppercase text-sm mb-12 animate-pulse">Incoming Video Call...</p>
+
+            <div class="flex gap-12 w-full justify-center">
+                <button onclick="acceptCall()" class="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center text-2xl text-white shadow-[0_0_20px_rgba(239,68,68,0.4)] transition hover:scale-110">
+                    <i class="fas fa-phone-slash"></i>
+                </button>
+                <button onclick="acceptCall()" class="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center text-2xl text-white shadow-[0_0_20px_rgba(16,185,129,0.6)] pulse-btn">
+                    <i class="fas fa-video"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Presell/Instruction Screen (Shows after clicking accept) -->
+        <div id="instructionScreen" class="hidden flex-col items-center text-center px-6 w-full max-w-sm">
+            <div class="loader"></div>
+            <h3 class="text-2xl font-black text-white mb-4">Connecting Stream...</h3>
+            <div class="bg-slate-900 border border-slate-700 p-5 rounded-xl text-left shadow-2xl">
+                <p class="text-yellow-400 font-bold text-sm mb-2"><i class="fas fa-exclamation-triangle"></i> System Notice:</p>
+                <p class="text-slate-300 text-sm leading-relaxed mb-4">
+                    To join the private video room, you might see quick sponsor ads or a verification page next. 
+                    <strong class="text-white">Simply skip or complete the quick steps</strong> to automatically start the video call.
+                </p>
+                <div class="w-full bg-slate-800 rounded-full h-2 mt-4 overflow-hidden">
+                    <div class="bg-emerald-500 h-2 rounded-full" style="width: 100%; animation: loadBar 3s linear;"></div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // SMARTLINK HERE
-        const OFFER_LINK = "https://your-cpa-smartlink.com";
+        // Apnar Affizer Smartlink
+        const OFFER_LINK = "https://t.taffizerq.com/click?pid=3844&offer_id=2310";
 
-        // Apnar deya 11 ti chobi
-        const images = [
-            "https://github.com/mizan000321-ops/newv/blob/main/G3UZgO_XMAAzE6N.jpg?raw=true",
-            "https://github.com/mizan000321-ops/newv/blob/main/GoWoZl9X0AA1I6V.jpg?raw=true",
-            "https://github.com/mizan000321-ops/newv/blob/main/Gv2LKn_XwAAsWou.jpg?raw=true",
-            "https://github.com/mizan000321-ops/newv/blob/main/HAwdaxsW0AA1AU1.jpg?raw=true",
-            "https://github.com/mizan000321-ops/newv/blob/main/HBuOij0WoAAfrI3.jpg?raw=true",
-            "https://github.com/mizan000321-ops/newv/blob/main/HE7LupIXEAA2xnS.jpg?raw=true",
-            "https://github.com/mizan000321-ops/newv/blob/main/HG2xUfkX0AAZEu5.jpg?raw=true",
-            "https://github.com/mizan000321-ops/newv/blob/main/HGTqY9UX0AAUZlR.jpg?raw=true",
-            "https://github.com/mizan000321-ops/newv/blob/main/HGwpfY6XwAAYJZl.jpg?raw=true",
-            "https://github.com/mizan000321-ops/newv/blob/main/HHN_VvQXsAAyPas.jpg?raw=true",
-            "https://github.com/mizan000321-ops/newv/blob/main/HIdka0EWIAAYMTj.jpg?raw=true"
+        // Profiles Data
+        const profiles = [
+            { name: "Sophia", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/028D519.jpg?raw=true" },
+            { name: "Isabella", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/759c3ad84ec875d108abac0fae3cfb84.jpg?raw=true" },
+            { name: "Mia", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/8cd9b917-2a23-4f57-84a3-bf06bc59ff04.webp?raw=true" },
+            { name: "Olivia", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/918ef2fd-89ae-4629-97c1-46aed0bcf444.webp?raw=true" },
+            { name: "Emma", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/CIXW6LHH7T.jpg?raw=true" },
+            { name: "Ava", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/GsKNHUXXsAA_z4C.jpg?raw=true" },
+            { name: "Charlotte", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/IPG5HGJFGS-thumb.jpg?raw=true" },
+            { name: "Amelia", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/K4EAKZLISG-thumb.jpg?raw=true" },
+            { name: "Harper", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/QYVIU1LTLK-thumb.jpg?raw=true" },
+            { name: "Evelyn", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/T4APYLQ1UD.jpg?raw=true" },
+            { name: "Abigail", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/WZT9ONOAVQ.jpg?raw=true" },
+            { name: "Emily", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/Z5CJD4WFFK.jpg?raw=true" },
+            { name: "Elizabeth", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/images%201.jpg?raw=true" },
+            { name: "Sofia", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/images4.jpg?raw=true" },
+            { name: "Avery", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/post94873717708903160IMG_2631.jpeg?raw=true" }
         ];
 
-        const names = ["Jessica", "Ashley", "Sarah", "Emily", "Chloe", "Amanda", "Megan", "Rachel", "Lauren", "Samantha", "Nicole"];
-
+        // 1. Build the Gallery UI
         const galleryGrid = document.getElementById('galleryGrid');
-
-        // Render Gallery (Trick 5: Shesher 3ta blur thakbe)
-        images.forEach((src, index) => {
-            const isBlurred = index >= 8; // Shesher 3ta blur
-            const distance = Math.floor(Math.random() * 5) + 1;
-            
-            const cardHtml = `
-                <div class="image-card relative rounded-xl overflow-hidden shadow-lg border border-slate-700 aspect-[4/5] bg-slate-800">
-                    <img src="${src}" class="w-full h-full object-cover ${isBlurred ? 'premium-blur' : ''}">
+        profiles.forEach(profile => {
+            const html = `
+                <div class="relative rounded-xl overflow-hidden aspect-[3/4] bg-slate-800">
+                    <img src="${profile.img}" class="w-full h-full object-cover opacity-90">
                     
-                    ${isBlurred ? `
-                        <div class="absolute inset-0 flex flex-col items-center justify-center bg-black/40">
-                            <i class="fas fa-lock text-3xl text-pink-500 mb-2 drop-shadow-md"></i>
-                            <span class="bg-pink-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase">Tap to Unlock</span>
-                        </div>
-                    ` : ''}
-
-                    <div class="absolute top-2 left-2 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm px-2 py-1 rounded-full text-[10px]">
-                        <span class="w-2 h-2 live-dot"></span> <span class="font-bold text-white">Live</span>
+                    <!-- Top Badges (From your image) -->
+                    <div class="absolute top-2 right-2 flex flex-col items-end gap-1.5">
+                        <div class="badge-video"><i class="fas fa-video text-xs"></i> 1-ON-1 VIDEO</div>
+                        <div class="badge-live"><span class="dot-black"></span> LIVE NOW</div>
                     </div>
 
-                    <div class="absolute bottom-0 left-0 w-full p-2 bg-gradient-to-t from-black/90 to-transparent">
-                        <p class="font-bold text-sm text-white">${names[index]}, ${20 + Math.floor(Math.random() * 8)} <i class="fas fa-check-circle text-blue-400 text-[10px]"></i></p>
-                        <p class="text-[10px] text-slate-300"><i class="fas fa-map-marker-alt text-pink-500"></i> ${distance} miles away</p>
+                    <!-- Bottom Info -->
+                    <div class="absolute bottom-0 left-0 w-full p-2 bg-gradient-to-t from-black via-black/80 to-transparent pt-6">
+                        <div class="font-black text-white text-lg">${profile.name} <i class="fas fa-check-circle text-blue-500 text-sm"></i></div>
+                        <div class="text-xs text-slate-300"><i class="fas fa-map-marker-alt text-emerald-500"></i> ${Math.floor(Math.random() * 5) + 1} miles away</div>
                     </div>
                 </div>
             `;
-            galleryGrid.innerHTML += cardHtml;
+            galleryGrid.innerHTML += html;
         });
 
-        // Global Click Handler
+        // 2. Global Redirect Function
         function goToOffer() {
             window.location.href = OFFER_LINK;
         }
 
-        // Countdown Timer Logic
-        let timeLeft = 300; // 5 minutes
-        setInterval(() => {
-            if(timeLeft <= 0) timeLeft = 300;
-            timeLeft--;
-            const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-            const s = (timeLeft % 60).toString().padStart(2, '0');
-            document.getElementById('timer').innerText = `${m}:${s}`;
-        }, 1000);
-
-        // Social Proof Popups Logic
-        const toast = document.getElementById('toast');
-        const toastImg = document.getElementById('toastImg');
-        const toastText = document.getElementById('toastText');
+        // 3. Dynamic Call Logic (Every 20 seconds)
+        const callPopup = document.getElementById('callPopup');
+        const callScreen = document.getElementById('callScreen');
+        const instructionScreen = document.getElementById('instructionScreen');
         
-        function showToast() {
-            const randomImg = images[Math.floor(Math.random() * images.length)];
-            const randomName = names[Math.floor(Math.random() * names.length)];
-            const messages = ["sent you a friend request", "is looking at your profile", "wants to video chat"];
-            const randomMsg = messages[Math.floor(Math.random() * messages.length)];
-
-            toastImg.src = randomImg;
-            toastText.innerText = `${randomName} ${randomMsg}`;
+        function triggerRandomCall() {
+            // Pick a random profile
+            const randomProfile = profiles[Math.floor(Math.random() * profiles.length)];
             
-            toast.classList.add('toast-show');
-            setTimeout(() => { toast.classList.remove('toast-show'); }, 4000);
+            // Set image and name
+            document.getElementById('callerImg').src = randomProfile.img;
+            document.getElementById('callerName').innerText = randomProfile.name + ", " + (Math.floor(Math.random() * 6) + 19);
+            
+            // Reset UI states
+            callScreen.classList.remove('hidden');
+            callScreen.classList.add('flex');
+            instructionScreen.classList.add('hidden');
+            instructionScreen.classList.remove('flex');
+            
+            // Show Popup
+            callPopup.classList.remove('hidden');
+            callPopup.classList.add('flex');
         }
-        
-        setInterval(showToast, 12000); // Every 12 seconds
 
-        // Idle Timeout Call Popup
-        let idleTimer = setTimeout(() => {
-            document.getElementById('callPopup').classList.remove('hidden');
-            document.getElementById('callPopup').classList.add('flex');
-        }, 8000); // 8 seconds of inactivity
+        // Initial call after 5 seconds, then every 20 seconds
+        setTimeout(() => {
+            triggerRandomCall();
+            setInterval(triggerRandomCall, 20000); // 20 seconds interval
+        }, 5000);
 
-        // Reset idle timer on any interaction (before click takes them away)
-        window.onload = window.onmousemove = window.onscroll = window.ontouchstart = () => {
-            clearTimeout(idleTimer);
-            if(document.getElementById('callPopup').classList.contains('hidden')){
-                idleTimer = setTimeout(() => {
-                    document.getElementById('callPopup').classList.remove('hidden');
-                    document.getElementById('callPopup').classList.add('flex');
-                }, 12000); 
-            }
-        };
+        // 4. Accept Call & Presell Instruction Logic
+        function acceptCall() {
+            // Hide call buttons, show loading instructions
+            callScreen.classList.add('hidden');
+            callScreen.classList.remove('flex');
+            instructionScreen.classList.remove('hidden');
+            instructionScreen.classList.add('flex');
+
+            // Wait 3 seconds for them to read the instruction, then redirect
+            setTimeout(() => {
+                window.location.href = OFFER_LINK;
+            }, 3500);
+        }
     </script>
 </body>
 </html>
