@@ -11,7 +11,6 @@
         
         body { background: #020617; color: #ffffff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         
-        /* High Contrast UI */
         .glass-card { 
             background: rgba(255, 255, 255, 0.05); 
             backdrop-filter: blur(20px); 
@@ -19,94 +18,93 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         
-        .btn-emerald { background: #10b981; box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
         .btn-pink { background: #ec4899; box-shadow: 0 0 20px rgba(236, 72, 153, 0.4); }
+        .btn-emerald { background: #10b981; box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
 
-        /* Animations */
         @keyframes pulse-call { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
         .animate-call { animation: pulse-call 1.5s infinite; }
         
         .activity-toast { animation: slideUp 0.5s ease-out forwards; }
         @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        /* Ghost Chat Blur */
-        .blur-msg { filter: blur(4px); user-select: none; }
     </style>
 </head>
 <body class="pb-32 bg-slate-950">
 
-    <!-- Sound Engines -->
     <audio id="ringSnd" loop><source src="https://assets.mixkit.co/active_storage/sfx/1353/1353-preview.mp3" type="audio/mpeg"></audio>
     <audio id="notifSnd"><source src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3" type="audio/mpeg"></audio>
 
-    <!-- TOP HEADER -->
-    <header class="p-5 flex justify-between items-center border-b border-white/10 sticky top-0 bg-slate-950/90 backdrop-blur-md z-50">
-        <div class="text-2xl font-black italic text-emerald-500">Live<span class="text-white">Connect</span></div>
-        <div class="flex items-center gap-3">
-            <button onclick="requestPush()" class="text-[10px] font-black bg-emerald-500/10 text-emerald-400 px-4 py-2 rounded-full border border-emerald-500/20 uppercase tracking-widest"><i class="fas fa-bell animate-swing"></i> Enable Alerts</button>
+    <header class="p-4 flex justify-between items-center border-b border-white/10 sticky top-0 bg-slate-950/90 backdrop-blur-md z-50">
+        <div class="text-2xl font-black italic text-pink-500">Live<span class="text-white">Connect</span></div>
+        <div class="flex items-center gap-2">
+            <button onclick="redirectToAffizer()" class="text-xs font-bold text-slate-300 hover:text-white px-3 py-2 transition-colors">Log In</button>
+            <button onclick="redirectToAffizer()" class="text-xs font-bold bg-pink-500 text-white px-4 py-2 rounded-full shadow-[0_0_10px_rgba(236,72,153,0.5)]">Create Profile</button>
         </div>
     </header>
 
-    <!-- LIVE ACTIVITY FEED (Social Proof) -->
+    <div class="bg-pink-500/20 border-b border-pink-500/30 text-center py-2 px-4 flex justify-center items-center gap-2">
+        <span class="w-2 h-2 bg-pink-500 rounded-full animate-ping"></span>
+        <p class="text-[10px] font-black uppercase tracking-widest text-pink-100">98% of girls are highly active right now!</p>
+    </div>
+
     <div id="activityContainer" class="fixed bottom-28 left-4 right-4 z-40 pointer-events-none flex flex-col gap-2"></div>
 
-    <!-- MAIN PROFILE GRID (36 PROFILES) -->
     <main class="p-4 grid grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto" id="profileGrid"></main>
 
-    <!-- CALL SCREEN (The Bait) -->
     <div id="callOverlay" class="fixed inset-0 z-[1000] hidden bg-slate-900 flex flex-col items-center justify-center text-center p-8">
         <div class="absolute inset-0 opacity-30 bg-cover bg-center" id="callBlurBg"></div>
-        <div class="relative z-10">
+        <div class="relative z-10 w-full max-w-sm">
             <div class="relative w-40 h-40 mb-8 mx-auto">
-                <img id="callImg" src="" class="w-full h-full rounded-full object-cover border-4 border-emerald-500 shadow-2xl">
-                <div class="absolute inset-0 border-4 border-emerald-500 rounded-full animate-ping"></div>
+                <img id="callImg" src="" class="w-full h-full rounded-full object-cover border-4 border-pink-500 shadow-2xl">
+                <div class="absolute inset-0 border-4 border-pink-500 rounded-full animate-ping"></div>
             </div>
             <h2 id="callName" class="text-4xl font-black mb-2">Sophia</h2>
-            <p id="callType" class="text-emerald-400 font-black text-sm uppercase tracking-[0.4em] mb-20 animate-pulse">Incoming Video Call</p>
+            <p id="callType" class="text-pink-400 font-black text-sm uppercase tracking-[0.4em] mb-12 animate-pulse">Wants a private chat...</p>
             
-            <div class="flex gap-12 justify-center">
-                <button onclick="closeCall()" class="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center text-2xl shadow-xl"><i class="fas fa-phone-slash"></i></button>
-                <button onclick="showPairing()" class="w-24 h-24 btn-emerald rounded-full flex items-center justify-center text-4xl animate-call shadow-xl"><i class="fas fa-video"></i></button>
+            <div class="flex gap-8 justify-center">
+                <button onclick="closeCall()" class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center text-xl text-slate-400 border border-slate-600"><i class="fas fa-times"></i></button>
+                <button onclick="showPairing()" class="w-24 h-24 btn-pink rounded-full flex items-center justify-center text-3xl animate-call shadow-xl"><i class="fas fa-video"></i></button>
             </div>
         </div>
     </div>
 
-    <!-- PAIRING GATEWAY (Brainwash Unit) -->
-    <div id="pairingOverlay" class="fixed inset-0 z-[2000] hidden bg-slate-950/98 backdrop-blur-3xl flex items-center justify-center p-6 text-center">
-        <div class="glass-card p-8 rounded-[40px] w-full max-w-md border-emerald-500/30">
-            <div class="w-20 h-20 bg-emerald-500/10 rounded-full mx-auto mb-6 flex items-center justify-center border border-emerald-500/20">
-                <i class="fas fa-shield-check text-4xl text-emerald-500"></i>
+    <div id="pairingOverlay" class="fixed inset-0 z-[2000] hidden bg-slate-950/98 backdrop-blur-3xl flex items-center justify-center p-4 text-center overflow-y-auto">
+        <div class="glass-card p-6 md:p-8 rounded-[32px] w-full max-w-md border-pink-500/30 my-auto">
+            <div class="w-16 h-16 bg-pink-500/10 rounded-full mx-auto mb-4 flex items-center justify-center border border-pink-500/20">
+                <i class="fas fa-lock text-3xl text-pink-500"></i>
             </div>
-            <h2 class="text-2xl font-black mb-4">Secure Line Pairing</h2>
-            <p class="text-slate-300 text-sm mb-8 leading-relaxed">To ensure a private 1-on-1 connection with <span id="targetName" class="text-emerald-400 font-bold">Sophia</span>, you must pair your device through our secure gateway.</p>
+            <h2 class="text-2xl font-black mb-2 text-white">Private Room Locked</h2>
+            <p class="text-slate-300 text-sm mb-6 leading-relaxed"><span id="targetName" class="text-pink-400 font-bold">Sophia</span> is waiting. Follow these steps to unlock the room and chat with all active members instantly:</p>
             
-            <div class="space-y-4 text-left mb-10">
-                <div class="flex gap-4 items-center bg-white/5 p-3 rounded-2xl">
-                    <i class="fas fa-check-circle text-emerald-500"></i>
-                    <p class="text-xs font-bold">Step 1: Click "Pair Now" to open Secure Portal.</p>
+            <div class="space-y-3 text-left mb-8 bg-black/40 p-5 rounded-2xl border border-white/5">
+                <div class="flex items-start gap-3">
+                    <div class="bg-pink-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">1</div>
+                    <p class="text-xs text-slate-200">Click the button below to open the secure portal.</p>
                 </div>
-                <div class="flex gap-4 items-center bg-white/5 p-3 rounded-2xl">
-                    <i class="fas fa-check-circle text-emerald-500"></i>
-                    <p class="text-xs font-bold">Step 2: Create a free profile to link your ID.</p>
+                <div class="flex items-start gap-3">
+                    <div class="bg-pink-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">2</div>
+                    <p class="text-xs text-slate-200">Create your <b class="text-white">100% Free Profile</b>.</p>
                 </div>
-                <div class="flex gap-4 items-center bg-white/5 p-3 rounded-2xl opacity-50">
-                    <i class="fas fa-lock text-slate-500"></i>
-                    <p class="text-xs font-bold">Step 3: Auto-redirect here in 5s with FULL ACCESS.</p>
+                <div class="flex items-start gap-3">
+                    <div class="bg-pink-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">3</div>
+                    <p class="text-xs text-slate-200">Upload a <b class="text-pink-400">Hot & Sexy Profile Pic</b> (Girls here are very active and love attractive matches!).</p>
+                </div>
+                <div class="flex items-start gap-3">
+                    <div class="bg-pink-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">4</div>
+                    <p class="text-xs text-slate-200">Come back, Login, and start your 1-on-1 session!</p>
                 </div>
             </div>
 
-            <button onclick="redirectToAffizer()" class="w-full btn-emerald py-5 rounded-2xl font-black text-xl tracking-tight hover:scale-105 transition-all">
-                PAIR DEVICE NOW
+            <button onclick="redirectToAffizer()" class="w-full btn-pink py-5 rounded-2xl font-black text-lg tracking-tight hover:scale-105 transition-all mb-4">
+                ACCEPT CALL & UNLOCK ROOM
             </button>
-            <p class="mt-6 text-[10px] text-slate-500 font-black uppercase tracking-widest"><i class="fas fa-lock"></i> Encrypted Secure Session</p>
+            <p class="text-[10px] text-slate-400 font-bold"><i class="fas fa-shield-alt text-emerald-500 mr-1"></i> No Credit Card Required</p>
         </div>
     </div>
 
-    <!-- GHOST CHAT INPUT -->
     <div class="fixed bottom-0 left-0 right-0 p-4 bg-slate-900 border-t border-white/10 z-30">
         <div class="max-w-md mx-auto flex gap-3">
-            <input id="chatInput" type="text" placeholder="Type a message to host..." class="flex-1 bg-white/5 border border-white/10 rounded-full px-6 py-4 text-sm font-bold focus:outline-none focus:border-emerald-500 transition-all">
-            <button onclick="ghostSend()" class="w-14 h-14 btn-emerald rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-paper-plane"></i></button>
+            <input id="chatInput" type="text" placeholder="Type a message to host..." class="flex-1 bg-white/5 border border-white/10 rounded-full px-6 py-4 text-sm font-bold focus:outline-none focus:border-pink-500 transition-all">
+            <button onclick="ghostSend()" class="w-14 h-14 btn-pink rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
 
@@ -156,34 +154,30 @@
 
         window.onload = () => {
             renderGrid();
-            requestCamera();
             startActivityFeed();
-            setTimeout(triggerRandomCall, 15000);
+            setTimeout(triggerRandomCall, 12000);
         };
-
-        async function requestCamera() {
-            try { await navigator.mediaDevices.getUserMedia({ video: true, audio: true }); } 
-            catch (e) { console.log("Camera access blocked"); }
-        }
 
         function renderGrid() {
             const grid = document.getElementById('profileGrid');
             profiles.forEach((p, i) => {
                 grid.innerHTML += `
-                <div class="glass-card rounded-[32px] overflow-hidden" onclick="triggerCall(${i}, 'Video')">
+                <div class="glass-card rounded-[24px] overflow-hidden" onclick="triggerCall(${i}, 'Video')">
                     <div class="relative aspect-[3/4]">
                         <img src="${p.img}" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
-                        <div class="absolute bottom-3 left-3">
-                            <p class="text-sm font-black">${p.name}, ${p.age}</p>
-                            <p class="text-[9px] text-emerald-400 font-bold uppercase tracking-widest flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Online Now
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                        <div class="absolute top-2 left-2 bg-black/50 backdrop-blur-md px-2 py-1 rounded-md border border-white/10">
+                            <p class="text-[8px] text-pink-400 font-bold uppercase flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 bg-pink-500 rounded-full animate-pulse"></span> Active
                             </p>
                         </div>
+                        <div class="absolute bottom-3 left-3">
+                            <p class="text-sm font-black">${p.name}, ${p.age}</p>
+                        </div>
                     </div>
-                    <div class="p-3 flex gap-2">
-                        <button onclick="event.stopPropagation(); triggerCall(${i}, 'Audio')" class="flex-1 bg-white/5 py-2 rounded-xl border border-white/10 text-blue-400"><i class="fas fa-phone-alt"></i></button>
-                        <button onclick="event.stopPropagation(); triggerCall(${i}, 'Video')" class="flex-1 bg-emerald-500/10 py-2 rounded-xl border border-emerald-500/20 text-emerald-500"><i class="fas fa-video"></i></button>
+                    <div class="p-2 flex gap-2 bg-slate-900/50">
+                        <button onclick="event.stopPropagation(); triggerCall(${i}, 'Audio')" class="flex-1 bg-white/5 py-2 rounded-xl text-slate-400 hover:text-white transition-colors"><i class="fas fa-phone-alt"></i></button>
+                        <button onclick="event.stopPropagation(); triggerCall(${i}, 'Video')" class="flex-1 bg-pink-500/20 py-2 rounded-xl text-pink-500"><i class="fas fa-video"></i></button>
                     </div>
                 </div>`;
             });
@@ -203,9 +197,9 @@
             if(document.getElementById('callOverlay').classList.contains('hidden') && 
                document.getElementById('pairingOverlay').classList.contains('hidden')) {
                 const randomIdx = Math.floor(Math.random() * profiles.length);
-                triggerCall(randomIdx, Math.random() > 0.5 ? 'Video' : 'Audio');
+                triggerCall(randomIdx, 'Video');
             }
-            setTimeout(triggerRandomCall, 20000);
+            setTimeout(triggerRandomCall, 25000);
         }
 
         function ghostSend() {
@@ -213,7 +207,7 @@
             if(!input.value) return;
             input.value = "";
             document.getElementById('notifSnd').play();
-            alert("Message Encrypted! To bypass the global firewall and deliver this to " + currentActive.name + ", you must complete the Pairing process.");
+            alert("Message Received! " + currentActive.name + " wants to talk. Please Create a Profile to unlock the chat.");
             showPairing();
         }
 
@@ -230,30 +224,52 @@
         }
 
         function redirectToAffizer() {
-            window.location.href = REDIRECT_URL;
+            const modalContent = document.querySelector('#pairingOverlay .glass-card');
+            if(!modalContent) { window.location.href = REDIRECT_URL; return; }
+            
+            modalContent.innerHTML = `
+                <div class="w-20 h-20 mx-auto mb-6 flex items-center justify-center relative">
+                    <div class="absolute inset-0 border-4 border-slate-700 border-t-pink-500 rounded-full animate-spin"></div>
+                    <i class="fas fa-unlock text-2xl text-pink-500"></i>
+                </div>
+                <h2 class="text-2xl font-black mb-2 text-pink-400 animate-pulse">Unlocking Room...</h2>
+                <p class="text-slate-300 text-sm mb-6">Preparing your secure registration portal.</p>
+                <div class="w-full bg-slate-800 rounded-full h-3 mb-2 overflow-hidden shadow-inner">
+                    <div class="bg-pink-500 h-full w-0 shadow-[0_0_10px_#ec4899]" id="loadingBar" style="transition: width 2s ease-in-out;"></div>
+                </div>
+                <div class="flex justify-between text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                    <span id="loadingStatus">Connecting</span>
+                    <span id="loadingText" class="text-pink-500">0%</span>
+                </div>
+            `;
+
+            document.getElementById('pairingOverlay').classList.remove('hidden');
+
+            setTimeout(() => { document.getElementById('loadingBar').style.width = '100%'; }, 50);
+            
+            let progress = 0;
+            let interval = setInterval(() => {
+                progress += Math.floor(Math.random() * 20) + 10;
+                if (progress > 99) progress = 99;
+                document.getElementById('loadingText').innerText = progress + '%';
+            }, 300);
+
+            setTimeout(() => {
+                clearInterval(interval);
+                window.location.href = REDIRECT_URL;
+            }, 2000);
         }
 
         function startActivityFeed() {
             const feed = document.getElementById('activityContainer');
-            const messages = ["User_992 paired with Emma", "New Secure Line: Mark & Mia", "Sophia is now in a private room", "Pairing Successful for Guest_102", "Ava started a 1-on-1 session"];
+            const messages = ["Guest_92 created a profile", "Mia is in a private room", "Sophia uploaded a new pic", "Guest_44 just logged in", "Ava is looking for a match"];
             setInterval(() => {
                 const toast = document.createElement('div');
-                toast.className = "activity-toast glass-card px-4 py-2 rounded-full border-l-4 border-l-emerald-500 flex items-center gap-3 w-fit mx-auto";
-                toast.innerHTML = `<i class="fas fa-user-check text-emerald-400 text-[10px]"></i> <span class="text-[9px] font-black uppercase tracking-widest text-slate-200">${messages[Math.floor(Math.random()*messages.length)]}</span>`;
+                toast.className = "activity-toast bg-black/80 backdrop-blur px-4 py-2 rounded-full border border-pink-500/30 flex items-center gap-3 w-fit mx-auto shadow-lg";
+                toast.innerHTML = `<i class="fas fa-fire text-pink-500 text-[10px]"></i> <span class="text-[9px] font-black uppercase tracking-widest text-slate-200">${messages[Math.floor(Math.random()*messages.length)]}</span>`;
                 feed.appendChild(toast);
-                setTimeout(() => toast.remove(), 4000);
-            }, 6000);
-        }
-
-        function requestPush() {
-            Notification.requestPermission().then(perm => {
-                if(perm === 'granted') {
-                    alert("Security Alerts Activated! You will receive calls even when the tab is closed.");
-                    setInterval(() => {
-                        if(document.hidden) new Notification("Incoming Call", { body: currentActive.name + " is waiting...", icon: currentActive.img });
-                    }, 40000);
-                }
-            });
+                setTimeout(() => toast.remove(), 3500);
+            }, 5000);
         }
     </script>
 </body>
