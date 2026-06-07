@@ -3,147 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIP Direct Connect - Live Now</title>
+    <title>Direct Connect - Live Radar</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { background: #020617; color: #ffffff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .btn-pink { background: #ec4899; box-shadow: 0 0 20px rgba(236, 72, 153, 0.4); }
+        body { background: #0f172a; color: #ffffff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         
-        /* Platforms */
+        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .neon-border { box-shadow: 0 0 15px rgba(236, 72, 153, 0.5), inset 0 0 10px rgba(236, 72, 153, 0.2); border: 1px solid #ec4899; }
+        
+        /* Platform Themes */
         .theme-whatsapp { background-color: #0b141a !important; }
-        .theme-whatsapp .chat-hdr { background-color: #1f2c34 !important; border-bottom: 1px solid #2a3942; }
-        .theme-whatsapp .user-msg { background-color: #005c4b !important; }
         .theme-whatsapp .bot-msg { background-color: #202c33 !important; }
-
         .theme-telegram { background-color: #17212b !important; }
-        .theme-telegram .chat-hdr { background-color: #242f3d !important; border-bottom: 1px solid #2b394a; }
-        .theme-telegram .user-msg { background-color: #2b5278 !important; }
         .theme-telegram .bot-msg { background-color: #182533 !important; }
-
         .theme-snapchat { background-color: #000000 !important; }
-        .theme-snapchat .chat-hdr { background-color: #121212 !important; border-bottom: 1px solid #262626; }
-        .theme-snapchat .user-msg { background-color: #313131 !important; border-left: 3px solid #fffc00; }
         .theme-snapchat .bot-msg { background-color: #1c1c1c !important; }
+
+        /* Animations */
+        .radar-scan { border-radius: 50%; box-shadow: 0 0 0 0 rgba(236, 72, 153, 0.7); animation: radar 2s infinite; }
+        @keyframes radar { 70% { box-shadow: 0 0 0 20px rgba(236, 72, 153, 0); } 100% { box-shadow: 0 0 0 0 rgba(236, 72, 153, 0); } }
+        
+        .blur-image { filter: blur(12px); cursor: pointer; transition: 0.3s; }
+        .blur-image:hover { filter: blur(6px); }
 
         .typing-dot { animation: typing 1.4s infinite ease-in-out both; }
         .typing-dot:nth-child(1) { animation-delay: -0.32s; }
         .typing-dot:nth-child(2) { animation-delay: -0.16s; }
         @keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
         
-        .activity-toast { animation: slideUp 0.5s ease-out forwards; }
-        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        
-        .pulse-badge { animation: pulseRed 1.5s infinite; }
-        @keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
-        
-        .blur-image { filter: blur(8px); transition: 0.3s; cursor: pointer; }
-        .blur-image:hover { filter: blur(4px); }
+        /* Toast Alert */
+        .toast-enter { animation: slideInRight 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     </style>
 </head>
-<body class="pb-24 bg-slate-950">
+<body class="bg-slate-900 pb-20">
 
     <audio id="ringSnd" loop><source src="https://assets.mixkit.co/active_storage/sfx/1353/1353-preview.mp3" type="audio/mpeg"></audio>
     <audio id="msgSnd"><source src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3" type="audio/mpeg"></audio>
 
-    <header class="p-4 flex justify-between items-center border-b border-white/10 sticky top-0 bg-slate-950/90 backdrop-blur-md z-50">
-        <div class="text-2xl font-black italic text-pink-500">Live<span class="text-white">Connect</span></div>
-        <button onclick="redirectToAffizer()" class="text-xs font-bold bg-pink-500 text-white px-4 py-2 rounded-full shadow-[0_0_10px_rgba(236,72,153,0.5)] pulse-badge">Verify Age</button>
-    </header>
-
-    <div class="bg-emerald-500/10 border-b border-emerald-500/20 text-center py-2 px-4 flex justify-center items-center gap-2">
-        <i class="fas fa-shield-alt text-emerald-500 text-xs"></i>
-        <p class="text-[10px] font-black uppercase tracking-widest text-emerald-400">100% Secure & Private Connection</p>
-    </div>
-
-    <div id="activityContainer" class="fixed bottom-28 left-4 right-4 z-40 pointer-events-none flex flex-col gap-2"></div>
-
-    <main class="p-4 grid grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto" id="profileGrid"></main>
-
-    <div id="callOverlay" class="fixed inset-0 z-[3000] hidden bg-slate-900 flex flex-col items-center justify-center text-center p-8">
-        <div class="absolute inset-0 opacity-40 bg-cover bg-center" id="callBlurBg"></div>
-        <div class="relative z-10 w-full max-w-sm">
-            <h2 class="text-pink-500 font-black text-xl mb-6 animate-bounce">WAIT! DON'T LEAVE!</h2>
-            <div class="relative w-40 h-40 mb-8 mx-auto">
-                <img id="callImg" src="" class="w-full h-full rounded-full object-cover border-4 border-emerald-500 shadow-2xl">
-                <div class="absolute inset-0 border-4 border-emerald-500 rounded-full animate-ping"></div>
+    <div class="relative bg-gradient-to-b from-slate-900 to-slate-800 p-6 border-b border-white/5">
+        <div class="max-w-3xl mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-purple-500">LiveConnect</h1>
+                <p class="text-xs text-emerald-400 font-bold tracking-widest uppercase flex items-center gap-2 mt-1">
+                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span> 14 Members Online Now
+                </p>
             </div>
-            <h2 id="callName" class="text-4xl font-black mb-2 text-white">Someone</h2>
-            <p class="text-emerald-400 font-black text-sm uppercase tracking-[0.2em] mb-12 animate-pulse">Is starting a private video call...</p>
-            
-            <div class="flex gap-8 justify-center">
-                <button onclick="closeCall()" class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center text-xl text-slate-400 border border-slate-600"><i class="fas fa-phone-slash"></i></button>
-                <button onclick="showPairing()" class="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center text-3xl shadow-[0_0_30px_rgba(16,185,129,0.6)] animate-pulse"><i class="fas fa-video"></i></button>
+            <div class="w-12 h-12 bg-pink-500/20 rounded-full flex items-center justify-center radar-scan">
+                <i class="fas fa-satellite-dish text-pink-500"></i>
             </div>
         </div>
     </div>
 
-    <div id="chatModal" class="fixed inset-0 z-[1500] hidden flex flex-col transition-all">
-        <div class="chat-hdr flex items-center gap-3 p-4 bg-slate-900 shadow-md">
-            <button onclick="closeChat()" class="text-slate-400 hover:text-white px-2"><i class="fas fa-chevron-left"></i></button>
+    <div id="toastContainer" class="fixed top-24 right-4 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <main class="p-4 max-w-3xl mx-auto space-y-4" id="profileGrid"></main>
+
+    <div id="callOverlay" class="fixed inset-0 z-[3000] hidden bg-slate-950 flex flex-col items-center justify-center text-center p-8 backdrop-blur-md">
+        <div class="absolute inset-0 opacity-30 bg-cover bg-center" id="callBlurBg"></div>
+        <div class="relative z-10 w-full max-w-sm">
+            <p class="text-emerald-400 font-black text-sm uppercase tracking-[0.2em] mb-4 animate-pulse">Incoming Private Call</p>
+            <div class="relative w-48 h-48 mb-6 mx-auto">
+                <img id="callImg" src="" class="w-full h-full rounded-full object-cover border-[6px] border-emerald-500 shadow-[0_0_40px_rgba(16,185,129,0.5)]">
+                <div class="absolute inset-0 border-[6px] border-emerald-500 rounded-full animate-ping"></div>
+            </div>
+            <h2 id="callName" class="text-4xl font-black mb-12 text-white drop-shadow-lg">Name</h2>
+            
+            <div class="flex gap-10 justify-center">
+                <button onclick="closeCall()" class="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center text-2xl text-red-500 border border-red-500 hover:bg-red-500 hover:text-white transition"><i class="fas fa-phone-slash"></i></button>
+                <button onclick="acceptCall()" class="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center text-3xl shadow-[0_0_30px_rgba(16,185,129,0.8)] text-white hover:scale-110 transition"><i class="fas fa-video"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="chatModal" class="fixed inset-0 z-[1500] hidden flex flex-col transition-all bg-slate-900">
+        <div class="chat-hdr flex items-center gap-3 p-4 shadow-md z-10">
+            <button onclick="closeChat()" class="text-white/70 hover:text-white p-2"><i class="fas fa-arrow-left"></i></button>
             <div class="relative">
-                <img id="chatProfileImg" src="" class="w-10 h-10 rounded-full object-cover border-2">
+                <img id="chatProfileImg" src="" class="w-10 h-10 rounded-full object-cover">
                 <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-slate-900 rounded-full"></span>
             </div>
             <div class="flex-1">
-                <h3 id="chatProfileName" class="font-bold text-white leading-tight">Name</h3>
-                <p id="chatPlatformStatus" class="text-[10px] font-bold text-green-400">typing...</p>
+                <h3 id="chatProfileName" class="font-bold text-white leading-tight text-lg">Name</h3>
+                <p class="text-[11px] font-bold text-pink-400">Online • Secure Routing</p>
             </div>
-            <div id="chatHeaderIcon" class="text-xl p-2 rounded-full bg-white/5"></div>
         </div>
 
-        <div id="chatArea" class="flex-1 p-4 overflow-y-auto flex flex-col gap-3 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]">
-            </div>
+        <div id="chatArea" class="flex-1 p-4 overflow-y-auto flex flex-col gap-4 relative">
+            <div class="text-center text-[10px] uppercase text-white/40 font-bold mb-2 bg-black/20 py-1 rounded-full w-fit mx-auto px-4">Chat Started Securely</div>
+        </div>
 
-        <div class="p-4 bg-slate-900 border-t border-white/5 flex gap-2">
-            <input type="text" id="userMessage" placeholder="Message..." class="flex-1 bg-slate-800 text-white rounded-full px-5 py-3 text-sm focus:outline-none" onkeypress="if(event.key === 'Enter') sendUserMessage()">
-            <button onclick="sendUserMessage()" class="w-12 h-12 rounded-full bg-pink-500 text-white flex items-center justify-center hover:bg-pink-600 transition shadow-lg">
+        <div class="p-3 bg-black/40 backdrop-blur border-t border-white/10 flex gap-2 items-center">
+            <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/50"><i class="fas fa-plus"></i></div>
+            <input type="text" id="userMessage" placeholder="Type a message..." class="flex-1 bg-white/10 text-white rounded-full px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-pink-500" onkeypress="if(event.key === 'Enter') sendUserMessage()">
+            <button onclick="sendUserMessage()" class="w-12 h-12 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 text-white flex items-center justify-center hover:scale-105 transition shadow-lg">
                 <i class="fas fa-paper-plane"></i>
             </button>
         </div>
     </div>
 
-    <div id="pairingOverlay" class="fixed inset-0 z-[2000] hidden bg-slate-950/98 backdrop-blur-3xl flex items-center justify-center p-4 text-center overflow-y-auto">
-        <div class="glass-card p-6 md:p-8 rounded-[32px] w-full max-w-md border-pink-500/30 my-auto relative overflow-hidden">
-            <div class="absolute top-0 left-0 right-0 bg-red-600 text-white text-[10px] font-black py-1 uppercase tracking-widest flex justify-center gap-2">
-                <i class="fas fa-clock"></i> Link Expires In: <span id="countdown">04:59</span>
-            </div>
-
-            <div id="step1">
-                <div class="w-20 h-20 bg-pink-500/10 rounded-full mx-auto mt-6 mb-4 flex items-center justify-center border border-pink-500/20">
-                    <i class="fas fa-exclamation-triangle text-4xl text-pink-500"></i>
-                </div>
-                <h2 class="text-3xl font-black mb-2 text-white">Are you 18+?</h2>
-                <p class="text-slate-400 text-sm mb-8">This private room contains highly explicit content and live webcams. You must confirm your age.</p>
-                <div class="flex gap-4">
-                    <button onclick="window.location.href='https://google.com'" class="flex-1 bg-slate-800 py-4 rounded-xl font-bold text-slate-400">NO, EXIT</button>
-                    <button onclick="showStep2()" class="flex-[2] btn-pink py-4 rounded-xl font-black text-white text-lg">YES, I AM 18+</button>
-                </div>
-            </div>
-
-            <div id="step2" class="hidden mt-6">
-                <h2 class="text-2xl font-black mb-2 text-white">Create Free Profile</h2>
-                <p class="text-slate-300 text-sm mb-6"><span id="targetName" class="text-pink-400 font-bold">Sophia</span> is waiting for you to unlock the chat.</p>
+    <div id="pairingOverlay" class="fixed inset-0 z-[2000] hidden bg-black/95 flex items-center justify-center p-4 text-center">
+        <div class="glass-card neon-border p-8 rounded-3xl w-full max-w-md relative overflow-hidden">
+            <div class="absolute -inset-1/2 bg-gradient-to-r from-pink-500/10 to-purple-500/10 rotate-12 blur-3xl pointer-events-none"></div>
+            
+            <div class="relative z-10">
+                <i class="fas fa-shield-alt text-5xl text-pink-500 mb-4 drop-shadow-[0_0_15px_rgba(236,72,153,0.8)]"></i>
+                <h2 class="text-2xl font-black mb-2 text-white">Age Verification Required</h2>
+                <p class="text-slate-300 text-sm mb-6">You must create a free profile to view explicit media and start video calls with <span id="targetName" class="text-pink-400 font-bold">her</span>.</p>
                 
-                <div class="space-y-3 text-left mb-8 bg-black/40 p-5 rounded-2xl border border-white/5">
-                    <div class="flex items-start gap-3">
-                        <i class="fas fa-check-circle text-emerald-500 mt-0.5"></i>
-                        <p class="text-xs text-slate-200">100% Free Registration</p>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <i class="fas fa-check-circle text-emerald-500 mt-0.5"></i>
-                        <p class="text-xs text-slate-200">Unlock WhatsApp & Snapchats</p>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <i class="fas fa-check-circle text-emerald-500 mt-0.5"></i>
-                        <p class="text-xs text-slate-200">No Credit Card Required</p>
-                    </div>
+                <div class="bg-black/50 p-4 rounded-xl border border-white/5 mb-6 text-left space-y-2">
+                    <p class="text-xs text-slate-300 flex items-center gap-2"><i class="fas fa-check text-emerald-500"></i> 100% Free Registration</p>
+                    <p class="text-xs text-slate-300 flex items-center gap-2"><i class="fas fa-check text-emerald-500"></i> Instant Camera Access</p>
+                    <p class="text-xs text-slate-300 flex items-center gap-2"><i class="fas fa-check text-emerald-500"></i> No Credit Card Needed</p>
                 </div>
 
-                <button onclick="redirectToAffizer()" class="w-full btn-pink py-5 rounded-2xl font-black text-xl tracking-tight hover:scale-105 transition-all shadow-[0_0_30px_rgba(236,72,153,0.6)]">
-                    VERIFY NOW
+                <button onclick="redirectToAffizer()" class="w-full bg-gradient-to-r from-pink-500 to-rose-500 py-4 rounded-xl font-black text-lg tracking-wide hover:scale-105 transition-all shadow-[0_0_20px_rgba(236,72,153,0.5)]">
+                    CONTINUE & UNLOCK
                 </button>
             </div>
         </div>
@@ -152,76 +129,50 @@
     <script>
         const REDIRECT_URL = "https://t.taffizerq.com/719iel";
         let originalTitle = document.title;
-        let idleTime = 0;
         let hasCalled = false;
 
-        // TRICK 1: Dynamic Tab Title Alert
-        document.addEventListener("visibilitychange", () => {
-            if (document.hidden) {
-                document.title = "(1) 💬 New Message from Sophia!";
-            } else {
-                document.title = originalTitle;
-            }
-        });
-
-        // TRICK 2: Exit Intent
-        document.addEventListener("mouseleave", (e) => {
-            if(e.clientY < 0 && !hasCalled && document.getElementById('chatModal').classList.contains('hidden')) {
-                triggerCall(0, 'Video');
-                hasCalled = true;
-            }
-        });
-
-        // TRICK 7: Idle Trigger
-        setInterval(() => {
-            idleTime++;
-            if(idleTime > 15 && !hasCalled && document.getElementById('callOverlay').classList.contains('hidden') && document.getElementById('chatModal').classList.contains('hidden')) {
-                triggerCall(Math.floor(Math.random() * profiles.length), 'Video');
-                hasCalled = true;
-            }
-        }, 1000);
-        document.onclick = () => idleTime = 0;
-        document.onmousemove = () => idleTime = 0;
-
         const profiles = [
-            { name: "Sophia", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/zUhgoTkN_400x400.jpg?raw=true", age: 22, platform: "whatsapp", icon: "fab fa-whatsapp text-green-500", themeClass: "theme-whatsapp", reply: "Hey! 😈 The system blocks me from sending nudes here. Create a free profile below so I can add your number directly!" },
-            { name: "Emily", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/post94873717708903160IMG_2631.jpeg?raw=true", age: 24, platform: "snapchat", icon: "fab fa-snapchat-ghost text-yellow-400", themeClass: "theme-snapchat", reply: "Hi baby! Make a free avatar profile first so the system verifies you. Then tap below and let's trade snaps! 💋" },
-            { name: "Mia", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/photo_2026-02-01_19-40-54.jpg?raw=true", age: 21, platform: "telegram", icon: "fab fa-telegram text-blue-400", themeClass: "theme-telegram", reply: "Are you alone? 😉 Verify your age for free below to unlock my secret Telegram VIP room." },
-            { name: "Olivia", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/images_5faff59e27102.jpeg?raw=true", age: 23, platform: "whatsapp", icon: "fab fa-whatsapp text-green-500", themeClass: "theme-whatsapp", reply: "I'm looking for a private partner. Please complete your free registration so my chat restriction drops! 🔞" },
-            { name: "Ava", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/images_5fafd6212320b.jpeg?raw=true", age: 20, platform: "snapchat", icon: "fab fa-snapchat-ghost text-yellow-400", themeClass: "theme-snapchat", reply: "You caught me before a shower! 🚿 Click the button, make a free account and I'll call you directly." },
-            { name: "Charlotte", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/images_5fafcae692d2c.jpeg?raw=true", age: 25, platform: "telegram", icon: "fab fa-telegram text-blue-400", themeClass: "theme-telegram", reply: "Hey handsome! I'm active on Telegram right now. Create a free profile below to bypass the spam filters!" }
+            { name: "Sophia", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/zUhgoTkN_400x400.jpg?raw=true", age: 22, platform: "whatsapp", icon: "fab fa-whatsapp", themeClass: "theme-whatsapp", reply: "Hey! 😈 The system blocks me from sending photos here. Create a free profile below so I can add your number directly!" },
+            { name: "Emily", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/post94873717708903160IMG_2631.jpeg?raw=true", age: 24, platform: "snapchat", icon: "fab fa-snapchat-ghost", themeClass: "theme-snapchat", reply: "Hi baby! Make a free avatar profile first so the system verifies you. Then tap below and let's trade snaps! 💋" },
+            { name: "Mia", img: "https://github.com/gdjg536ydiv-bot/affizerp/blob/main/photo_2026-02-01_19-40-54.jpg?raw=true", age: 21, platform: "telegram", icon: "fab fa-telegram", themeClass: "theme-telegram", reply: "Are you alone? 😉 Verify your age for free below to unlock my secret Telegram VIP room." }
         ];
 
         let currentActive = profiles[0];
         let chatBlocked = false;
 
         window.onload = () => {
-            renderGrid();
-            startActivityFeed();
+            renderList();
+            startToasts();
+            
+            // TRICK: Auto trigger call after 7 seconds
+            setTimeout(() => {
+                if(!hasCalled && document.getElementById('chatModal').classList.contains('hidden')) {
+                    triggerCall(0);
+                    hasCalled = true;
+                }
+            }, 7000);
         };
 
-        function renderGrid() {
+        // Tab Title Alert Trick
+        document.addEventListener("visibilitychange", () => {
+            document.title = document.hidden ? "(1) 💬 New Notification!" : originalTitle;
+        });
+
+        function renderList() {
             const grid = document.getElementById('profileGrid');
             profiles.forEach((p, i) => {
                 grid.innerHTML += `
-                <div class="glass-card rounded-[24px] overflow-hidden border-white/5 relative group cursor-pointer" onclick="openChat(${i})">
-                    <div class="absolute top-2 right-2 z-10 w-4 h-4 bg-red-500 rounded-full border-2 border-slate-900 pulse-badge text-[8px] font-bold flex items-center justify-center text-white shadow-lg">1</div>
-                    <div class="relative aspect-[3/4]">
-                        <img src="${p.img}" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/10 to-transparent"></div>
-                        <div class="absolute bottom-12 left-3 flex gap-1">
-                            <span class="bg-black/60 backdrop-blur text-[8px] text-white px-2 py-0.5 rounded-full"><i class="fas fa-camera text-pink-400"></i> 14</span>
-                            <span class="bg-black/60 backdrop-blur text-[8px] text-white px-2 py-0.5 rounded-full"><i class="fas fa-video text-emerald-400"></i> 2</span>
-                        </div>
-                        <div class="absolute bottom-3 left-3">
-                            <p class="text-sm font-black flex items-center gap-2">${p.name}, ${p.age}</p>
-                            <p class="text-[9px] text-green-400 flex items-center gap-1 mt-0.5"><span class="typing-dot bg-green-400 w-1 h-1 rounded-full"></span><span class="typing-dot bg-green-400 w-1 h-1 rounded-full"></span><span class="typing-dot bg-green-400 w-1 h-1 rounded-full"></span> typing a message...</p>
-                        </div>
+                <div class="glass-card rounded-2xl p-4 flex gap-4 items-center cursor-pointer hover:bg-white/5 transition border-l-4 border-l-pink-500" onclick="openChat(${i})">
+                    <div class="relative w-16 h-16 shrink-0">
+                        <img src="${p.img}" class="w-full h-full rounded-full object-cover border-2 border-slate-700">
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-[8px] font-bold px-1.5 py-0.5 rounded-full shadow-lg border border-slate-900 animate-pulse">NEW</span>
                     </div>
-                    <div class="p-2 bg-slate-900/40">
-                        <button class="w-full bg-pink-500 text-white font-black py-2.5 rounded-xl text-xs flex items-center justify-center gap-1 shadow-[0_0_15px_rgba(236,72,153,0.3)]">
-                            <i class="${p.icon} text-white"></i> MESSAGE NOW
-                        </button>
+                    <div class="flex-1">
+                        <h3 class="font-black text-lg flex items-center gap-2">${p.name}, ${p.age} <i class="fas fa-certificate text-blue-400 text-xs"></i></h3>
+                        <p class="text-xs text-slate-400 mt-1">Tap to start private chat on ${p.platform}</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-xl shadow-inner">
+                        <i class="${p.icon} text-${p.platform === 'whatsapp' ? 'green' : p.platform === 'snapchat' ? 'yellow' : 'blue'}-400"></i>
                     </div>
                 </div>`;
             });
@@ -230,29 +181,28 @@
         function openChat(index) {
             currentActive = profiles[index];
             const modal = document.getElementById('chatModal');
+            
+            // Apply platform themes dynamically
             modal.className = `fixed inset-0 z-[1500] flex flex-col ${currentActive.themeClass}`;
             
             document.getElementById('chatProfileImg').src = currentActive.img;
             document.getElementById('chatProfileName').innerText = currentActive.name;
-            document.getElementById('chatHeaderIcon').innerHTML = `<i class="${currentActive.icon}"></i>`;
-            
-            const timeStr = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            document.getElementById('chatArea').innerHTML = `<div class="text-center text-[10px] uppercase text-white/30 font-bold my-4">Encrypted Session • ${timeStr}</div>`;
+            document.getElementById('chatArea').innerHTML = `<div class="text-center text-[10px] uppercase text-white/40 font-bold mb-2 bg-black/20 py-1 rounded-full w-fit mx-auto px-4">Chat Started Securely</div>`;
             
             modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; // Lock scroll
+            document.body.style.overflow = 'hidden';
             chatBlocked = false;
-            
-            // TRICK: Initial Auto Message
+
+            // Instantly send a fake blurred photo as a hook
             setTimeout(() => {
                 document.getElementById('msgSnd').play();
-                addFakeVoiceNote();
-            }, 1000);
+                addBlurredImage();
+            }, 800);
         }
 
         function closeChat() {
             document.getElementById('chatModal').classList.add('hidden');
-            document.body.style.overflow = 'auto'; // Unlock scroll
+            document.body.style.overflow = 'auto';
         }
 
         function sendUserMessage() {
@@ -269,63 +219,42 @@
             setTimeout(() => {
                 document.getElementById(typingId).remove();
                 document.getElementById('msgSnd').play();
-                
                 addMessage(currentActive.reply, 'bot');
-                
-                // TRICK 8: Blurred Image
-                setTimeout(() => addBlurredImage(), 1000);
-                setTimeout(() => addCtaButton(), 1500);
+                setTimeout(() => addCtaButton(), 1000);
             }, 2500);
         }
 
         function addMessage(text, sender) {
             const area = document.getElementById('chatArea');
             const box = document.createElement('div');
-            const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
             
             if(sender === 'user') {
-                box.className = "flex justify-end mb-1";
-                box.innerHTML = `<div class="user-msg text-white text-sm py-2 px-4 rounded-2xl rounded-tr-sm max-w-[85%] shadow-md leading-relaxed relative pb-4">${text} <span class="absolute bottom-1 right-2 text-[8px] text-white/50">${time} <i class="fas fa-check-double text-blue-400"></i></span></div>`;
+                box.className = "flex justify-end";
+                box.innerHTML = `<div class="bg-pink-600 text-white text-sm py-2 px-4 rounded-2xl rounded-tr-sm max-w-[80%]">${text}</div>`;
             } else {
-                box.className = "flex justify-start mb-1 items-end gap-2";
-                box.innerHTML = `<img src="${currentActive.img}" class="w-6 h-6 rounded-full object-cover"><div class="bot-msg text-white text-sm py-2 px-4 rounded-2xl rounded-tl-sm max-w-[85%] shadow-md leading-relaxed relative pb-4">${text} <span class="absolute bottom-1 right-2 text-[8px] text-white/50">${time}</span></div>`;
+                box.className = "flex justify-start items-end gap-2";
+                box.innerHTML = `<img src="${currentActive.img}" class="w-6 h-6 rounded-full object-cover"><div class="bot-msg text-white text-sm py-2 px-4 rounded-2xl rounded-tl-sm max-w-[80%] shadow-md">${text}</div>`;
             }
             area.appendChild(box);
             area.scrollTop = area.scrollHeight;
         }
 
-        // TRICK 3: Fake Voice Note
-        function addFakeVoiceNote() {
-            const area = document.getElementById('chatArea');
-            const box = document.createElement('div');
-            box.className = "flex justify-start mb-1 items-end gap-2";
-            box.innerHTML = `
-                <img src="${currentActive.img}" class="w-6 h-6 rounded-full object-cover">
-                <div class="bot-msg text-white text-sm py-2 px-4 rounded-2xl rounded-tl-sm w-48 shadow-md flex items-center gap-3 cursor-pointer hover:opacity-80" onclick="showPairing()">
-                    <i class="fas fa-play-circle text-2xl text-pink-500"></i>
-                    <div class="flex-1 h-1 bg-white/20 rounded relative"><div class="absolute left-0 top-0 bottom-0 w-1/3 bg-pink-500 rounded"></div></div>
-                    <span class="text-[10px] font-bold">0:04</span>
-                </div>
-            `;
-            area.appendChild(box);
-            area.scrollTop = area.scrollHeight;
-        }
-
-        // TRICK 8: Blurred Premium Gallery
+        // Blurred Photo Hook Trick
         function addBlurredImage() {
             const area = document.getElementById('chatArea');
             const box = document.createElement('div');
-            box.className = "flex justify-start mb-1 items-end gap-2";
+            box.className = "flex justify-start items-end gap-2";
             box.innerHTML = `
                 <img src="${currentActive.img}" class="w-6 h-6 rounded-full object-cover">
-                <div class="bot-msg p-1 rounded-2xl rounded-tl-sm shadow-md relative" onclick="showPairing()">
-                    <img src="${currentActive.img}" class="w-32 h-40 object-cover rounded-xl blur-image border border-pink-500/30">
-                    <div class="absolute inset-0 flex items-center justify-center flex-col pointer-events-none">
-                        <i class="fas fa-lock text-white text-xl drop-shadow-md mb-1"></i>
-                        <span class="bg-black/60 text-[8px] text-white px-2 py-1 rounded font-bold uppercase">Click to Unblur</span>
+                <div class="bot-msg p-2 rounded-2xl rounded-tl-sm shadow-md relative cursor-pointer" onclick="showPairing()">
+                    <div class="relative w-40 h-48 rounded-xl overflow-hidden bg-black">
+                        <img src="${currentActive.img}" class="w-full h-full object-cover blur-image opacity-80">
+                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                            <div class="w-10 h-10 bg-black/60 rounded-full flex items-center justify-center mb-2 backdrop-blur"><i class="fas fa-lock text-white text-lg"></i></div>
+                            <span class="text-[9px] font-black uppercase tracking-widest bg-pink-500 text-white px-3 py-1 rounded">Unlock Photo</span>
+                        </div>
                     </div>
-                </div>
-            `;
+                </div>`;
             area.appendChild(box);
             area.scrollTop = area.scrollHeight;
         }
@@ -335,11 +264,8 @@
             const id = 'typing-' + Date.now();
             const box = document.createElement('div');
             box.id = id;
-            box.className = "flex justify-start mb-1 items-end gap-2";
-            box.innerHTML = `
-                <img src="${currentActive.img}" class="w-6 h-6 rounded-full object-cover">
-                <div class="bot-msg py-3 px-4 rounded-2xl rounded-tl-sm shadow-md flex gap-1"><div class="w-1.5 h-1.5 bg-pink-500 rounded-full typing-dot"></div><div class="w-1.5 h-1.5 bg-pink-500 rounded-full typing-dot"></div><div class="w-1.5 h-1.5 bg-pink-500 rounded-full typing-dot"></div></div>
-            `;
+            box.className = "flex justify-start items-end gap-2";
+            box.innerHTML = `<img src="${currentActive.img}" class="w-6 h-6 rounded-full object-cover"><div class="bot-msg py-3 px-4 rounded-2xl rounded-tl-sm shadow-md flex gap-1"><div class="w-1.5 h-1.5 bg-pink-500 rounded-full typing-dot"></div><div class="w-1.5 h-1.5 bg-pink-500 rounded-full typing-dot"></div><div class="w-1.5 h-1.5 bg-pink-500 rounded-full typing-dot"></div></div>`;
             area.appendChild(box);
             area.scrollTop = area.scrollHeight;
             return id;
@@ -348,13 +274,14 @@
         function addCtaButton() {
             const area = document.getElementById('chatArea');
             const btnBox = document.createElement('div');
-            btnBox.className = "flex justify-center my-3 animate-pulse";
-            btnBox.innerHTML = `<button onclick="showPairing()" class="bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black text-xs py-3 px-6 rounded-full shadow-[0_0_20px_rgba(236,72,153,0.5)]"><i class="fas fa-unlock-alt mr-1"></i> VERIFY TO UNLOCK CHAT</button>`;
+            btnBox.className = "flex justify-center mt-2 animate-bounce";
+            btnBox.innerHTML = `<button onclick="showPairing()" class="bg-gradient-to-r from-pink-500 to-rose-500 text-white font-black text-xs py-3 px-8 rounded-full shadow-[0_0_20px_rgba(236,72,153,0.6)] uppercase tracking-wide">Verify Account to Chat</button>`;
             area.appendChild(btnBox);
             area.scrollTop = area.scrollHeight;
         }
 
-        function triggerCall(i, type) {
+        // Call & Pairing Logic
+        function triggerCall(i) {
             currentActive = profiles[i];
             document.getElementById('callImg').src = currentActive.img;
             document.getElementById('callBlurBg').style.backgroundImage = `url(${currentActive.img})`;
@@ -363,51 +290,35 @@
             document.getElementById('ringSnd').play();
         }
 
-        function showPairing() {
-            document.getElementById('chatModal').classList.add('hidden');
-            document.getElementById('callOverlay').classList.add('hidden');
-            document.getElementById('ringSnd').pause();
-            document.getElementById('targetName').innerText = currentActive.name;
-            document.getElementById('pairingOverlay').classList.remove('hidden');
-            startTimer();
-        }
-
         function closeCall() {
             document.getElementById('callOverlay').classList.add('hidden');
             document.getElementById('ringSnd').pause();
         }
 
-        function showStep2() {
-            document.getElementById('step1').classList.add('hidden');
-            document.getElementById('step2').classList.remove('hidden');
+        function acceptCall() {
+            closeCall();
+            showPairing();
+        }
+
+        function showPairing() {
+            document.getElementById('chatModal').classList.add('hidden');
+            document.getElementById('targetName').innerText = currentActive.name;
+            document.getElementById('pairingOverlay').classList.remove('hidden');
         }
 
         function redirectToAffizer() { window.location.href = REDIRECT_URL; }
 
-        // TRICK 4: Countdown Timer
-        function startTimer() {
-            let time = 299; // 4:59
-            const timerEl = document.getElementById('countdown');
+        // Live Toasts Trick
+        function startToasts() {
+            const feed = document.getElementById('toastContainer');
             setInterval(() => {
-                let m = Math.floor(time / 60);
-                let s = time % 60;
-                s = s < 10 ? '0' + s : s;
-                timerEl.innerHTML = `0${m}:${s}`;
-                if(time > 0) time--;
-            }, 1000);
-        }
-
-        // TRICK 11: FOMO Toasts
-        function startActivityFeed() {
-            const feed = document.getElementById('activityContainer');
-            const locations = ["NY", "CA", "UK", "TX", "FL", "Local"];
-            setInterval(() => {
+                if(document.hidden) return;
                 const toast = document.createElement('div');
-                toast.className = "activity-toast bg-slate-900/90 backdrop-blur px-4 py-2 rounded-xl border-l-4 border-emerald-500 flex items-center gap-3 w-fit shadow-xl";
-                toast.innerHTML = `<img src="${profiles[Math.floor(Math.random()*profiles.length)].img}" class="w-6 h-6 rounded-full"><p class="text-[10px] font-bold text-slate-300">Guest from ${locations[Math.floor(Math.random()*locations.length)]} <span class="text-emerald-400">just verified</span></p>`;
+                toast.className = "toast-enter glass-card px-4 py-3 rounded-xl border-l-4 border-l-emerald-500 flex items-center gap-3 w-64 shadow-2xl";
+                toast.innerHTML = `<img src="${profiles[Math.floor(Math.random()*profiles.length)].img}" class="w-8 h-8 rounded-full"><div class="flex-1"><p class="text-[10px] text-slate-300">Just verified age!</p><p class="text-xs font-bold text-white">Guest from US</p></div>`;
                 feed.appendChild(toast);
                 setTimeout(() => toast.remove(), 4000);
-            }, 7000);
+            }, 8000);
         }
     </script>
 </body>
